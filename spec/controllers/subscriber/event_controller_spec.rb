@@ -88,7 +88,7 @@ describe Subscriber::EventController do
 
   context 'POST create' do
 
-    let(:event) { Fabricate(:event, groups: [group]) }
+    let(:event) { create_event('event', now) }
 
     it 'adds subscription' do
       expect do
@@ -129,6 +129,7 @@ describe Subscriber::EventController do
   def create_event(name, start_at, event_group = group)
     event = Fabricate(:event, name: name, groups: [event_group])
     event.dates.first.update_attribute(:start_at, start_at)
+    event
   end
 
 end
