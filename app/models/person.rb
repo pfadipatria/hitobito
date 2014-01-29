@@ -253,6 +253,12 @@ class Person < ActiveRecord::Base
     result
   end
 
+  def latest_qualifications_uniq_by_kind
+    qualifications.
+      includes(:person, :qualification_kind).order_by_date.
+      group_by(&:qualification_kind).values.map(&:first)
+  end
+
   public :generate_reset_password_token!
 
   private

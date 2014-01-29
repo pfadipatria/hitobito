@@ -291,4 +291,23 @@ describe Person do
     end
   end
 
+
+  context '#latest_qualifications_uniq' do
+    let(:sl)   { qualification_kinds(:sl) }
+    let(:gl)   { qualification_kinds(:gl) }
+    let(:role) { Fabricate(Group::TopGroup::Leader.name.to_sym, group: groups(:top_group)) }
+
+    before do
+      Fabricate(:qualification, person: person, qualification_kind: sl, start_at: Date.new(2010, 3, 10))
+      Fabricate(:qualification, person: person, qualification_kind: sl, start_at: Date.new(2012, 3, 10))
+      Fabricate(:qualification, person: person, qualification_kind: gl, start_at: Date.new(2012, 3, 10))
+    end
+
+    subject { person.latest_qualifications_uniq_by_kind }
+
+    it 'includes duplicate qualification only once' do
+      should have(2).items
+      subject.map(&:qualification_kind).should eq [sl, gl]
+    end
+  end
 end
