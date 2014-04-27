@@ -160,6 +160,7 @@ de:
         roles: Rollen
         created_at: Erstellt
         updated_at: Geändert
+        profession: Beruf
 
       group:
         name: Name

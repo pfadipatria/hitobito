@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140303120546) do
+ActiveRecord::Schema.define(version: 20140427154255) do
 
   create_table "custom_content_translations", force: true do |t|
     t.integer  "custom_content_id", null: false
@@ -260,6 +260,7 @@ ActiveRecord::Schema.define(version: 20140303120546) do
     t.integer  "primary_group_id"
     t.integer  "failed_attempts",                     default: 0
     t.datetime "locked_at"
+    t.string   "profession"
     t.index ["email"], :name => "index_people_on_email", :unique => true
     t.index ["reset_password_token"], :name => "index_people_on_reset_password_token", :unique => true
   end
