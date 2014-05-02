@@ -18,8 +18,8 @@
 #  birthday               :date
 #  additional_information :text
 #  contact_data_visible   :boolean          default(FALSE), not null
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
+#  created_at             :datetime
+#  updated_at             :datetime
 #  encrypted_password     :string(255)
 #  reset_password_token   :string(255)
 #  reset_password_sent_at :datetime
@@ -294,7 +294,12 @@ describe Person do
       person.first_name = 'Foo'
       person.email = people(:top_leader).email
       person.save(validate: false).should be_false
-      person.errors[:email].should == ['ist bereits vergeben']
+      person.errors[:email].should == ["ist bereits vergeben. Diese Adresse muss für alle " \
+                                        "Personen eindeutig sein, da sie beim Login verwendet " \
+                                        "wird. Du kannst jedoch unter 'Weitere E-Mails' " \
+                                        "Adressen eintragen, welche bei anderen Personen als " \
+                                        "Haupt-E-Mail vergeben sind (Die Haupt-E-Mail kann leer " \
+                                        "gelassen werden).\n"]
     end
   end
 
@@ -327,6 +332,27 @@ describe Person do
         v.event.should == 'create'
         v.main_id.should == p.id
       end
+    end
+  end
+
+  context '.mailing_emails_for' do
+    it 'contains main and additional mailing emails' do
+      e1 = Fabricate(:additional_email, contactable: people(:top_leader), mailings: true)
+      Fabricate(:additional_email, contactable: people(:bottom_member), mailings: false)
+      Person.mailing_emails_for(Person.all).should =~ [
+        'bottom_member@example.com',
+        'hitobito@puzzle.ch',
+        'top_leader@example.com',
+        e1.email
+      ]
+    end
+
+    it 'does not contain blank emails' do
+      people(:bottom_member).update_attributes!(email: ' ')
+      Person.mailing_emails_for(Person.all).should =~ [
+        'hitobito@puzzle.ch',
+        'top_leader@example.com'
+      ]
     end
   end
 end

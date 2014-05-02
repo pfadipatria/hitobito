@@ -13,6 +13,35 @@
 
 ActiveRecord::Schema.define(version: 20140427154255) do
 
+  create_table "additional_emails", force: true do |t|
+    t.integer "contactable_id",                  null: false
+    t.string  "contactable_type",                null: false
+    t.string  "email",                           null: false
+    t.string  "label"
+    t.boolean "public",           default: true, null: false
+    t.boolean "mailings",         default: true, null: false
+    t.index ["contactable_id", "contactable_type"], :name => "index_additional_emails_on_contactable_id_and_contactable_type"
+  end
+
+  create_table "age_group_counts", force: true do |t|
+    t.integer "member_count_id"
+    t.integer "birth_year"
+    t.integer "count_m"
+    t.integer "count_f"
+  end
+
+  create_table "censuses", force: true do |t|
+    t.integer "year",      null: false
+    t.date    "start_at"
+    t.date    "finish_at"
+    t.index ["year"], :name => "index_censuses_on_year", :unique => true
+  end
+
+  create_table "corps", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "custom_content_translations", force: true do |t|
     t.integer  "custom_content_id", null: false
     t.string   "locale",            null: false
@@ -172,11 +201,11 @@ ActiveRecord::Schema.define(version: 20140427154255) do
     t.integer  "parent_id"
     t.integer  "lft"
     t.integer  "rgt"
-    t.string   "name",                        null: false
-    t.string   "short_name",     limit: 31
-    t.string   "type",                        null: false
+    t.string   "name",                                                null: false
+    t.string   "short_name",             limit: 31
+    t.string   "type",                                                null: false
     t.string   "email"
-    t.string   "address",        limit: 1024
+    t.string   "address",                limit: 1024
     t.integer  "zip_code"
     t.string   "town"
     t.string   "country"
@@ -188,6 +217,13 @@ ActiveRecord::Schema.define(version: 20140427154255) do
     t.integer  "creator_id"
     t.integer  "updater_id"
     t.integer  "deleter_id"
+    t.boolean  "pta",                                 default: false, null: false
+    t.boolean  "vkp",                                 default: false, null: false
+    t.boolean  "pbs_material_insurance",              default: false, null: false
+    t.string   "website"
+    t.string   "pbs_shortname",          limit: 15
+    t.string   "bank_account"
+    t.text     "description"
     t.index ["layer_group_id"], :name => "index_groups_on_layer_group_id"
     t.index ["lft", "rgt"], :name => "index_groups_on_lft_and_rgt"
     t.index ["parent_id"], :name => "index_groups_on_parent_id"
@@ -227,28 +263,53 @@ ActiveRecord::Schema.define(version: 20140427154255) do
     t.index ["group_id"], :name => "index_mailing_lists_on_group_id"
   end
 
+  create_table "member_counts", force: true do |t|
+    t.integer "kantonalverband_id", null: false
+    t.integer "region_id"
+    t.integer "abteilung_id",       null: false
+    t.integer "year",               null: false
+    t.integer "leiter_f"
+    t.integer "leiter_m"
+    t.integer "biber_f"
+    t.integer "biber_m"
+    t.integer "woelfe_f"
+    t.integer "woelfe_m"
+    t.integer "pfadis_f"
+    t.integer "pfadis_m"
+    t.integer "pios_f"
+    t.integer "pios_m"
+    t.integer "rover_f"
+    t.integer "rover_m"
+    t.integer "pta_f"
+    t.integer "pta_m"
+    t.integer "corps_id"
+    t.index ["abteilung_id", "year"], :name => "index_member_counts_on_abteilung_id_and_year"
+    t.index ["kantonalverband_id", "year"], :name => "index_member_counts_on_kantonalverband_id_and_year"
+    t.index ["region_id", "year"], :name => "index_member_counts_on_region_id_and_year"
+  end
+
   create_table "people", force: true do |t|
     t.string   "first_name"
     t.string   "last_name"
     t.string   "company_name"
     t.string   "nickname"
-    t.boolean  "company",                             default: false, null: false
+    t.boolean  "company",                              default: false, null: false
     t.string   "email"
-    t.string   "address",                limit: 1024
+    t.string   "address",                 limit: 1024
     t.integer  "zip_code"
     t.string   "town"
     t.string   "country"
-    t.string   "gender",                 limit: 1
+    t.string   "gender",                  limit: 1
     t.date     "birthday"
     t.text     "additional_information"
-    t.boolean  "contact_data_visible",                default: false, null: false
+    t.boolean  "contact_data_visible",                 default: false, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "encrypted_password"
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",                       default: 0
+    t.integer  "sign_in_count",                        default: 0
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
@@ -258,9 +319,17 @@ ActiveRecord::Schema.define(version: 20140427154255) do
     t.integer  "creator_id"
     t.integer  "updater_id"
     t.integer  "primary_group_id"
-    t.integer  "failed_attempts",                     default: 0
+    t.integer  "failed_attempts",                      default: 0
     t.datetime "locked_at"
     t.string   "profession"
+    t.string   "salutation"
+    t.string   "title"
+    t.integer  "grade_of_school"
+    t.date     "entry_date"
+    t.date     "leaving_date"
+    t.string   "j_s_number"
+    t.string   "correspondence_language", limit: 5
+    t.boolean  "brother_and_sisters",                  default: false, null: false
     t.index ["email"], :name => "index_people_on_email", :unique => true
     t.index ["reset_password_token"], :name => "index_people_on_reset_password_token", :unique => true
   end
