@@ -315,6 +315,7 @@ de:
 
       role:
         label: Bezeichnung
+        is_main_role: Hauptfunktion
         type: Rolle
         group_id: Gruppe
         person_id: Person

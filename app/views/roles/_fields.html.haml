@@ -16,5 +16,11 @@
 = f.labeled_input_field(:label,
                         data: {provide: :typeahead, source: entry.klass.available_labels},
                         help: t('.help_optional_label'))
+= f.labeled_input_field(:is_main_role,
+                        help: entry.is_main_role ? 'Cannot deselect main role' : '')
 
 = render_extensions :fields, locals: { f: f }
+
+- if entry.is_main_role
+  :javascript
+    document.getElementById("role_is_main_role").disabled = true;

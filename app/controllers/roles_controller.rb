@@ -18,6 +18,7 @@ class RolesController < CrudController
   before_render_form :set_group_selection
 
   hide_action :index, :show
+  
 
   def create
     assign_attributes
@@ -26,7 +27,7 @@ class RolesController < CrudController
     respond_with(entry, success: created, location: after_create_location(new_person))
   end
 
-  def update
+  def update   
     if type_changed?
       if change_type
         respond_to do |format|
@@ -42,6 +43,16 @@ class RolesController < CrudController
   end
 
   def destroy
+    #TODO Refactor long method
+    if entry.is_main_role
+      candidate_main_role = Role.where(person_id: entry.person_id, group_id: entry.group_id, is_main_role: false).first
+      if candidate_main_role
+        candidate_main_role.is_main_role = true
+        candidate_main_role.save
+      end
+    end
+    #----
+    
     super do |format|
       location = can?(:show, entry.person) ? person_path(entry.person_id) : group_path(parent)
       format.html { redirect_to(location) }

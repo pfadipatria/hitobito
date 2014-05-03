@@ -10,16 +10,19 @@
 #
 # Table name: roles
 #
-#  id         :integer          not null, primary key
-#  person_id  :integer          not null
-#  group_id   :integer          not null
-#  type       :string(255)      not null
-#  label      :string(255)
-#  created_at :datetime
-#  updated_at :datetime
-#  deleted_at :datetime
+#  id           :integer          not null, primary key
+#  person_id    :integer          not null
+#  group_id     :integer          not null
+#  type         :string(255)      not null
+#  label        :string(255)
+#  created_at   :datetime
+#  updated_at   :datetime
+#  deleted_at   :datetime
+#  is_main_role :boolean          default(FALSE), not null
 #
 class Role < ActiveRecord::Base
+  
+  PUBLIC_ATTRS = [:is_main_role]
 
   has_paper_trail meta: { main_id: ->(r) { r.person_id },
                           main_type: Person.sti_name },
@@ -35,7 +38,7 @@ class Role < ActiveRecord::Base
 
   # All attributes actually used (and mass-assignable) by the respective STI type.
   class_attribute :used_attributes
-  self.used_attributes = [:label]
+  self.used_attributes = [:label, :is_main_role]
 
   # Attributes that may only be modified by people from superior layers.
   class_attribute :superior_attributes
@@ -56,12 +59,16 @@ class Role < ActiveRecord::Base
   validators # eager generate schema validators before sti classes are loaded
 
   ### CALLBACKS
+  before_create :reset_old_main_role
+  before_create :ensure_existence_of_main_role
+  before_update :reset_old_main_role
+  before_destroy :set_other_main_role
 
   after_create :set_contact_data_visible
   after_create :set_first_primary_group
   after_destroy :reset_contact_data_visible
   after_destroy :reset_primary_group
-
+  
   ### CLASS METHODS
 
   class << self
@@ -129,5 +136,31 @@ class Role < ActiveRecord::Base
 
   def old_enough_to_archive?
     (Time.zone.now - created_at) > Settings.role.minimum_days_to_archive.days
+  end
+  
+  def reset_old_main_role
+    if is_main_role
+      old_main_role = Role.where(person_id: person_id, group_id: group_id, is_main_role: true).first
+      if old_main_role 
+        old_main_role.is_main_role = false
+        old_main_role.save
+      end
+    end
+  end
+  
+  def set_other_main_role
+    if is_main_role
+      candidate_main_role = Role.where(person_id: person_id, group_id: group_id, is_main_role: false).first
+      if candidate_main_role
+        candidate_main_role.is_main_role = true
+        candidate_main_role.save
+      end
+    end
+  end
+  
+  def ensure_existence_of_main_role
+    if !is_main_role && !Role.where(person_id: person_id, group_id: group_id).first
+      is_main_role = true
+    end
   end
 end
