@@ -19,7 +19,6 @@ class RolesController < CrudController
 
   hide_action :index, :show
   
-
   def create
     assign_attributes
     new_person = entry.person.new_record?
@@ -42,17 +41,7 @@ class RolesController < CrudController
     end
   end
 
-  def destroy
-    #TODO Refactor long method
-    if entry.is_main_role
-      candidate_main_role = Role.where(person_id: entry.person_id, group_id: entry.group_id, is_main_role: false).first
-      if candidate_main_role
-        candidate_main_role.is_main_role = true
-        candidate_main_role.save
-      end
-    end
-    #----
-    
+  def destroy    
     super do |format|
       location = can?(:show, entry.person) ? person_path(entry.person_id) : group_path(parent)
       format.html { redirect_to(location) }
