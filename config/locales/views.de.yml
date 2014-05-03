@@ -184,6 +184,7 @@ de:
 
     fields:
       help_optional_label: Optionale Bezeichnung der Rolle dieser Person
+      help_main_role_label: Hauptrolle kann nicht abgewählt werden
 
     person_fields:
       create_new_person: Neue Person erfassen

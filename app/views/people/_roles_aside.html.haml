@@ -28,7 +28,10 @@
                   - roles.each_with_index do |role, index|
                     %tr
                       %td
-                        %strong
+                        - if role.is_main_role
+                          %strong
+                            = role.to_s
+                        - else
                           = role.to_s
                       %td= link_action_edit(edit_group_role_path(role.group, role)) if can?(:edit, role)
                       %td= link_action_destroy(group_role_path(role.group, role)) if can?(:destroy, role)

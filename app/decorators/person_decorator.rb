@@ -83,7 +83,13 @@ class PersonDecorator < ApplicationDecorator
   def functions_short(functions, scope_method, scope = nil)
     functions.select! { |r| r.send("#{scope_method}_id") == scope.id } if scope
     h.safe_join(functions) do |f|
-      content_tag(:p, function_short(f, scope_method, scope), id: h.dom_id(f))
+      if f.is_main_role
+        content_tag(:strong) do
+          content_tag(:p, function_short(f, scope_method, scope), id: h.dom_id(f))
+        end
+      else
+        content_tag(:p, function_short(f, scope_method, scope), id: h.dom_id(f))
+      end
     end
   end
 

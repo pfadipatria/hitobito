@@ -17,7 +17,7 @@
                         data: {provide: :typeahead, source: entry.klass.available_labels},
                         help: t('.help_optional_label'))
 = f.labeled_input_field(:is_main_role,
-                        help: entry.is_main_role ? 'Cannot deselect main role' : '')
+                        help: entry.is_main_role ? t('.help_main_role_label') : '')
 
 = render_extensions :fields, locals: { f: f }
 
