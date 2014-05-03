@@ -11,9 +11,8 @@
       %h2= t('.additional_data')
       %div
         = render_attrs(entry, :birthday, :gender)
-        
+
         = render_attrs(entry, :profession)
-        
 
         = render_extensions :details, locals: { show_full: can?(:show_full, entry) }
 

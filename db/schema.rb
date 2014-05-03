@@ -182,11 +182,11 @@ ActiveRecord::Schema.define(version: 20140427154255) do
     t.integer  "parent_id"
     t.integer  "lft"
     t.integer  "rgt"
-    t.string   "name",                                                null: false
-    t.string   "short_name",             limit: 31
-    t.string   "type",                                                null: false
+    t.string   "name",                        null: false
+    t.string   "short_name",     limit: 31
+    t.string   "type",                        null: false
     t.string   "email"
-    t.string   "address",                limit: 1024
+    t.string   "address",        limit: 1024
     t.integer  "zip_code"
     t.string   "town"
     t.string   "country"
@@ -242,23 +242,23 @@ ActiveRecord::Schema.define(version: 20140427154255) do
     t.string   "last_name"
     t.string   "company_name"
     t.string   "nickname"
-    t.boolean  "company",                              default: false, null: false
+    t.boolean  "company",                             default: false, null: false
     t.string   "email"
-    t.string   "address",                 limit: 1024
+    t.string   "address",                limit: 1024
     t.integer  "zip_code"
     t.string   "town"
     t.string   "country"
-    t.string   "gender",                  limit: 1
+    t.string   "gender",                 limit: 1
     t.date     "birthday"
     t.text     "additional_information"
-    t.boolean  "contact_data_visible",                 default: false, null: false
+    t.boolean  "contact_data_visible",                default: false, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "encrypted_password"
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",                        default: 0
+    t.integer  "sign_in_count",                       default: 0
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
@@ -268,7 +268,7 @@ ActiveRecord::Schema.define(version: 20140427154255) do
     t.integer  "creator_id"
     t.integer  "updater_id"
     t.integer  "primary_group_id"
-    t.integer  "failed_attempts",                      default: 0
+    t.integer  "failed_attempts",                     default: 0
     t.datetime "locked_at"
     t.string   "profession"
     t.index ["email"], :name => "index_people_on_email", :unique => true
