@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140427154255) do
+ActiveRecord::Schema.define(version: 20140503115642) do
 
   create_table "additional_emails", force: true do |t|
     t.integer "contactable_id",                  null: false
@@ -329,13 +329,14 @@ ActiveRecord::Schema.define(version: 20140427154255) do
   end
 
   create_table "roles", force: true do |t|
-    t.integer  "person_id",  null: false
-    t.integer  "group_id",   null: false
-    t.string   "type",       null: false
+    t.integer  "person_id",                    null: false
+    t.integer  "group_id",                     null: false
+    t.string   "type",                         null: false
     t.string   "label"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.datetime "deleted_at"
+    t.boolean  "is_main_role", default: false, null: false
     t.index ["person_id", "group_id"], :name => "index_roles_on_person_id_and_group_id"
     t.index ["type"], :name => "index_roles_on_type"
   end
