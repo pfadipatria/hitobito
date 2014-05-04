@@ -15,7 +15,7 @@ describe Export::Csv::People::PeopleFull do
 
   subject { people_list }
 
-  its(:attributes) do should eq [:first_name, :last_name, :company_name, :nickname, :company, :email, :address,
+  its(:attributes) do should eq [:first_name, :last_name, :company_name, :profession, :nickname, :company, :email, :address,
                                  :zip_code, :town, :country, :gender, :birthday, :additional_information, :roles] end
 
   context '#attribute_labels' do
@@ -36,7 +36,7 @@ describe Export::Csv::People::PeopleFull do
   context 'integration' do
 
     let(:full_headers) do
-      ['Vorname', 'Nachname', 'Firmenname', 'Übername', 'Firma', 'Haupt-E-Mail',
+      ['Vorname', 'Nachname', 'Firmenname', 'Übername', 'Firma', 'Beruf', 'Haupt-E-Mail',
        'Adresse', 'PLZ', 'Ort', 'Land', 'Geschlecht', 'Geburtstag',
        'Zusätzliche Angaben', 'Rollen']
     end
