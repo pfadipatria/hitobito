@@ -59,9 +59,10 @@ class Role < ActiveRecord::Base
   validators # eager generate schema validators before sti classes are loaded
 
   ### CALLBACKS
-  before_create :reset_old_main_role
   before_create :ensure_existence_of_main_role
-  before_update :reset_old_main_role
+  after_create :reset_old_main_role
+  before_update :ensure_existence_of_main_role_when_updating
+  after_update :reset_old_main_role
   before_destroy :set_other_main_role
 
   after_create :set_contact_data_visible
@@ -140,11 +141,23 @@ class Role < ActiveRecord::Base
   
   def reset_old_main_role
     if is_main_role
-      old_main_role = Role.where(person_id: person_id, group_id: group_id, is_main_role: true).first
-      if old_main_role 
+      old_main_role = Role.where('id != ?', id).where(person_id: person_id, group_id: group_id, is_main_role: true).first
+      if old_main_role
         old_main_role.is_main_role = false
         old_main_role.save
       end
+    end
+  end
+  
+  def ensure_existence_of_main_role    
+    if !is_main_role && !Role.where(person_id: person_id, group_id: group_id, is_main_role: true).first
+      self.is_main_role = true
+    end
+  end
+  
+  def ensure_existence_of_main_role_when_updating
+    if is_main_role_was && !is_main_role && !Role.where('id != ?', id).where(person_id: person_id, group_id: group_id, is_main_role: true).first
+      self.is_main_role = true
     end
   end
   
@@ -155,12 +168,6 @@ class Role < ActiveRecord::Base
         candidate_main_role.is_main_role = true
         candidate_main_role.save
       end
-    end
-  end
-  
-  def ensure_existence_of_main_role
-    if !is_main_role && !Role.where(person_id: person_id, group_id: group_id).first
-      is_main_role = true
     end
   end
 end
