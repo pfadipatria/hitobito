@@ -1,3 +1,25 @@
+== Branch addressTelSearch ==
+The changes of this Branch needs to fulfill the following task:
+"Damit wir bei nicht vollständigen manuell erfassten Datensätzen eine gewisse Datenqualität sicher stellen sollen die Angaben eines Mitgliedes über einen Telefonbuch-Dienst (z.B. tel.search.ch) geprüft werden können.
+Diese Prüfung kann manuell mittels einem Button bei der Adresse ausgelöst werden sofern ein Benutzer die Rechte eine Addresse zu ändern hat. "
+
+What is already done:
+
+-> files that have to be changed:
+	*_person_fields.haml (app/views/roles) -> In this view js-forms already exists. Specially <f.labeled_person_field(:person)> is the form that needs to be adapted
+		
+	*people_controller.rb (app/controllers) -> After typing 3 characters the ajax-form of the view get a request from the database via the people-controller -> function <query> -> this function returns a json-string of the db-results.
+	
+	*standard_form_builder (app/helpers) -> The function person_field generates the form for _person_field.haml. The following line
+		of code can be used to fulfill the requirement of this task: url: @template.query_people_path -> The url has to be changed and changed in routes.rb
+	
+	*routes.rb (config) -> The following piece of code is the one to modify:
+		resources :people, only: :show do
+	      collection do
+	        get :query
+	      end
+	    end
+
 == Welcome to hitobito
 
 hitobito is an open source web application to manage complex group hierarchies with members, events and a lot more.
