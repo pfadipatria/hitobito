@@ -19,6 +19,14 @@ What is already done:
 	        get :query
 	      end
 	    end
+	    
+Gems needed:
+To get results from tel.search.ch need the following gem:
+rest-client
+
+A simple and useful HTTP and REST client
+
+
 
 == Welcome to hitobito
 
