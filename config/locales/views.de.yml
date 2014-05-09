@@ -182,8 +182,7 @@ de:
 
     person_fields:
       create_new_person: Neue Person erfassen
-      search_existing_person: Bestehende Person suchen
-
+      search_existing_person: Bestehende Person
 
   people:
     send_password_instructions: Login Informationen wurden verschickt.

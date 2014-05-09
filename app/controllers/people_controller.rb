@@ -6,6 +6,9 @@
 #  https://github.com/hitobito/hitobito.
 
 class PeopleController < CrudController
+  
+  #require'rest_client'
+  require 'rexml/document'
 
   include Concerns::RenderPeopleExports
 
@@ -19,7 +22,7 @@ class PeopleController < CrudController
                           :picture, :remove_picture] +
                           Contactable::ACCESSIBLE_ATTRS
 
-  decorates :group, :person, :people, :versions
+  decorates :group, :person, :people, :versions, :telsearch
 
   helper_method :index_full_ability?
 
@@ -70,6 +73,10 @@ class PeopleController < CrudController
     end
 
     render json: people.collect(&:as_typeahead)
+  end
+  
+  def telsearch
+    puts "--------"
   end
 
   def history

@@ -22,7 +22,13 @@ Hitobito::Application.routes.draw do
         get :query
       end
     end
-
+    
+    resources :people do
+      collection do
+        get :telsearch
+      end
+    end
+    
     resources :groups do
 
       member do
