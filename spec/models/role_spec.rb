@@ -107,6 +107,114 @@ describe Role do
         person.primary_group_id.should == 42
       end
     end
+    
+    context 'main role' do
+      it 'is set for first role in a group' do
+        subject.save.should be_true
+        person.roles.first.is_main_role.should be_true
+      end
+      
+      it 'is set for first role in a new group' do
+        r = Role.new
+        r.type = 'Group::TopGroup::Leader'
+        r.person = person
+        r.group = groups(:top_group)
+        r.save!
+        
+        r2 = Role.new
+        r2.type = 'Group::BottomLayer::Leader'
+        r2.person = person
+        r2.group = group
+        r2.save!
+
+        r.is_main_role.should be_true
+        r2.is_main_role.should be_true
+      end
+      
+      it 'is not set if a main role already exists in the same group' do
+        subject.save!
+        r = Role.new
+        r.type = 'Group::BottomLayer::Member'
+        r.person = person
+        r.group = group
+        r.save!
+        
+        r.is_main_role.should be_false
+      end
+      
+      it 'is reset if new main role is added' do
+        r = Role.new
+        r.type = 'Group::BottomLayer::Leader'
+        r.person = person
+        r.group = group
+        r.save!
+        
+        r.is_main_role.should be_true
+   
+        r2 = Role.new
+        r2.type = 'Group::BottomLayer::Member'
+        r2.person = person
+        r2.group = group
+        r2.is_main_role = true
+        r2.save!
+        r.reload
+        
+        r.is_main_role.should be_false
+        r2.is_main_role.should be_true
+      end
+      
+      it 'can not be unset for main role' do
+        subject.save!
+        subject.is_main_role.should be_true
+        subject.is_main_role = false
+        subject.is_main_role.should be_false
+        subject.save!
+        subject.is_main_role.should be_true
+      end
+      
+      it 'is unchanged if other normal role in same group is deleted' do
+        r = Role.new
+        r.type = 'Group::BottomLayer::Leader'
+        r.person = person
+        r.group = group
+        r.save!
+   
+        r2 = Role.new
+        r2.type = 'Group::BottomLayer::Member'
+        r2.person = person
+        r2.group = group
+        r2.save!
+        
+        r.is_main_role.should be_true
+        r2.is_main_role.should be_false
+        
+        r2.destroy
+        r.reload
+        r.is_main_role.should be_true
+      end
+      
+      it 'is set for another role if the main role is deleted' do 
+        r = Role.new
+        r.type = 'Group::BottomLayer::Leader'
+        r.person = person
+        r.group = group
+        r.save!
+   
+        r2 = Role.new
+        r2.type = 'Group::BottomLayer::Member'
+        r2.person = person
+        r2.group = group
+        r2.save!
+        
+        r.is_main_role.should be_true
+        r2.is_main_role.should be_false
+        
+        r.destroy
+        r2.reload
+        r2.is_main_role.should be_true
+      end
+      
+    end
 
     context 'contact data callback' do
 
