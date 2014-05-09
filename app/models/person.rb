@@ -1,4 +1,10 @@
 # encoding: utf-8
+
+#  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
+#  hitobito and licensed under the Affero General Public License version 3
+#  or later. See the COPYING file at the top-level directory or at
+#  https://github.com/hitobito/hitobito.
+
 # == Schema Information
 #
 # Table name: people
@@ -18,8 +24,8 @@
 #  birthday               :date
 #  additional_information :text
 #  contact_data_visible   :boolean          default(FALSE), not null
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
+#  created_at             :datetime
+#  updated_at             :datetime
 #  encrypted_password     :string(255)
 #  reset_password_token   :string(255)
 #  reset_password_sent_at :datetime
@@ -36,17 +42,13 @@
 #  primary_group_id       :integer
 #  failed_attempts        :integer          default(0)
 #  locked_at              :datetime
-#
+#  profession             :string(255)
 
-#  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
-#  hitobito and licensed under the Affero General Public License version 3
-#  or later. See the COPYING file at the top-level directory or at
-#  https://github.com/hitobito/hitobito.
 class Person < ActiveRecord::Base
 
   PUBLIC_ATTRS = [:id, :first_name, :last_name, :nickname, :company_name, :company,
                   :email, :address, :zip_code, :town, :country, :gender, :birthday,
-                  :picture, :primary_group_id]
+                  :picture, :primary_group_id, :profession]
 
   # define devise before other modules
   devise :database_authenticatable,
@@ -135,6 +137,12 @@ class Person < ActiveRecord::Base
 
     def preload_groups
       all.extending(Person::PreloadGroups)
+    end
+
+    def mailing_emails_for(people)
+      emails = people.collect(&:email) +
+               AdditionalEmail.mailing_emails_for(people)
+      emails.select(&:present?).uniq
     end
 
     private

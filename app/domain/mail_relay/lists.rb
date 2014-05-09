@@ -87,7 +87,7 @@ module MailRelay
 
     # List of receiver email addresses for the resent email.
     def receivers
-      mailing_list.people.collect(&:email).select(&:present?)
+      Person.mailing_emails_for(mailing_list.people.to_a)
     end
 
     def mailing_list
@@ -116,7 +116,7 @@ module MailRelay
     end
 
     def sender_is_additional_sender?
-      mailing_list.additional_sender.to_s.split(',').collect(&:strip).include?(sender_email)
+      mailing_list.additional_sender.to_s.split(/[,;]/).collect(&:strip).include?(sender_email)
     end
 
     def sender_is_list_administrator?

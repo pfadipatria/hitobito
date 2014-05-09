@@ -1,4 +1,11 @@
 # encoding: utf-8
+
+#  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
+#  hitobito and licensed under the Affero General Public License version 3
+#  or later. See the COPYING file at the top-level directory or at
+#  https://github.com/hitobito/hitobito.
+
+
 # == Schema Information
 #
 # Table name: groups
@@ -16,19 +23,14 @@
 #  town           :string(255)
 #  country        :string(255)
 #  contact_id     :integer
-#  created_at     :datetime         not null
-#  updated_at     :datetime         not null
+#  created_at     :datetime
+#  updated_at     :datetime
 #  deleted_at     :datetime
 #  layer_group_id :integer
 #  creator_id     :integer
 #  updater_id     :integer
 #  deleter_id     :integer
 #
-
-#  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
-#  hitobito and licensed under the Affero General Public License version 3
-#  or later. See the COPYING file at the top-level directory or at
-#  https://github.com/hitobito/hitobito.
 class Group < ActiveRecord::Base
 
   MINIMAL_SELECT = %w(id name type parent_id lft rgt layer_group_id deleted_at).

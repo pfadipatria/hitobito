@@ -10,6 +10,11 @@ de:
       time: "%H:%M"
       date_time: "%d.%m.%Y %H:%M"
       month_year: '%B %Y'
+  date:
+    formats:
+      default: ! '%d.%m.%Y'
+      long: ! '%e %B %Y'
+      short: ! '%e %b'
   number:
     currency:
       format:
@@ -56,6 +61,14 @@ de:
             mail_name_not_allowed:
         person:
           name_missing: 'Bitte geben Sie einen Namen ein.'
+          attributes:
+            email:
+              taken: >
+                        ist bereits vergeben. Diese Adresse muss für alle Personen
+                        eindeutig sein, da sie beim Login verwendet wird. Du kannst jedoch unter
+                        'Weitere E-Mails' Adressen eintragen, welche bei anderen Personen
+                        als Haupt-E-Mail vergeben sind (Die Haupt-E-Mail
+                        kann leer gelassen werden).
         qualification:
           attributes:
             qualification_kind_id:
@@ -66,6 +79,9 @@ de:
               not_a_positive_number: 'muss einen positive Zahl sein um die %{model} reaktivierbar zu machen.'
 
     models:
+      additional_email:
+        one: Weitere E-Mail
+        other: Weitere E-Mails
       custom_content:
         one: Text
         other: Texte
@@ -134,10 +150,12 @@ de:
       person:
         first_name: Vorname
         last_name: Nachname
+        name: Name
         company_name: Firmenname
         company: Firma
         nickname: Übername
-        email: E-Mail
+        email: Haupt-E-Mail
+        emails: E-Mails
         password: Passwort
         password_confirmation: Passwort
         current_password: Altes Passwort
@@ -155,16 +173,18 @@ de:
         remember_me: Angemeldet bleiben
         phone_numbers: Telefonnummern
         social_accounts: Social Media
+        additional_emails: Weitere E-Mails
         picture: Neues Foto hochladen
         remove_picture: Aktuelles Foto entfernen
         roles: Rollen
         created_at: Erstellt
         updated_at: Geändert
+        profession: Beruf
 
       group:
         name: Name
         short_name: Kurzname
-        email: E-Mail
+        email: Haupt-E-Mail
         password: Password
         address: Adresse
         zip_code: PLZ
@@ -174,6 +194,7 @@ de:
         contact: Kontaktperson
         phone_numbers: Telefonnummern
         social_accounts: Social Media
+        additional_emails: Weitere E-Mails
         parent_id: Elterngruppe
         layer_group_id: Ebene
         type: Gruppentyp
@@ -210,6 +231,7 @@ de:
 
       event/role:
         label: Bezeichnung
+        person: Person
         participation: Person
 
       event/participation:
@@ -319,6 +341,17 @@ de:
               one: Extern
               other: Externe
 
+      contact_account:
+        predefined_labels:
+          privat: Privat
+          mobil: Mobil
+          arbeit: Arbeit
+          vater: Vater
+          mutter: Mutter
+          fax: Fax
+          andere: Andere
+          webseite: Webseite
+
       social_account:
         name: Name
         label: Typ
@@ -329,6 +362,21 @@ de:
         name: Social Media Name
         label: Social Media Typ
         public: Öffentlich
+
+      additional_email:
+        email: E-Mail
+        name: Weitere E-Mail
+        label: Weitere E-Mail Typ
+        label: Typ
+        public: Öffentlich
+        mailings: Versand
+
+      additional_emails:
+        email: E-Mail
+        name: Weitere E-Mail
+        label: Weitere E-Mail Typ
+        public: Öffentlich
+        mailings: Versand
 
       mailing_list:
         name: Name
@@ -342,6 +390,9 @@ de:
 
       subscription:
         related_role_types: Rollen
+
+      people_filter:
+        name: Name
 
       custom_content:
         label: Text

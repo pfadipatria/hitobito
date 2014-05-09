@@ -3,6 +3,10 @@ PATH
   specs:
     hitobito_patria (0.0.1)
       devise_ldap_authenticatable
+<<<<<<< HEAD
+=======
+      hitobito_pbs
+>>>>>>> c1fc0a841fa30b2cd49a07f24219bff3435e5def
 
 PATH
   remote: ../hitobito_pbs
@@ -392,6 +396,7 @@ GEM
       rubocop (>= 0.9.0)
     ruby-graphviz (1.0.9)
     ruby-nuggets (0.9.6)
+    ruby-prof (0.14.2)
     ruby-progressbar (1.4.2)
     ruby-rc4 (0.1.5)
     ruby2ruby (2.0.7)
@@ -422,8 +427,6 @@ GEM
       rubyzip (~> 1.0)
       websocket (~> 1.0.4)
     sexp_processor (4.4.1)
-    sextant (0.2.4)
-      rails (>= 3.2)
     simplecov (0.7.1)
       multi_json (~> 1.0)
       simplecov-html (~> 0.7.1)
@@ -591,11 +594,11 @@ DEPENDENCIES
   rspec-rails
   rubocop
   rubocop-checkstyle_formatter
+  ruby-prof
   sass-rails
   schema_validations
   seed-fu
   selenium-webdriver
-  sextant
   simplecov-rcov
   spork (~> 1.0.0rc3)
   spring-commands-rspec
