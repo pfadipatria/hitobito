@@ -189,11 +189,14 @@ class Event < ActiveRecord::Base
       end
     end
 
+    def all_types
+      [Event] + Event.subclasses
+    end
+
     # Return the event type with the given sti_name or raise an exception if not found
     def find_event_type!(sti_name)
-      types = [Event] + Event.subclasses
-      type = types.detect { |t| t.sti_name == sti_name }
-      fail ActiveRecord::RecordNotFound, "No event '#{sti_name}' found" if type.nil?
+      type = all_types.detect { |t| t.sti_name == sti_name }
+      fail ActiveRecord::RecordNotFound, "No event type '#{sti_name}' found" if type.nil?
       type
     end
 
@@ -212,7 +215,7 @@ class Event < ActiveRecord::Base
 
   ### INSTANCE METHODS
 
-  def to_s(format = :default)
+  def to_s(_format = :default)
     name
   end
 

@@ -12,11 +12,11 @@ module EventsHelper
     participation.person = current_user
 
     if event.application_possible? && can?(:new, participation)
-       group ||= event.groups.first
-       action_button(t('event_decorator.apply'),
-                     new_group_event_participation_path(group, event),
-                     :check)
-     end
+      group ||= event.groups.first
+      action_button(t('event_decorator.apply'),
+                    new_group_event_participation_path(group, event),
+                    :check)
+    end
   end
 
   def typed_group_events_path(group, event_type, options = {})

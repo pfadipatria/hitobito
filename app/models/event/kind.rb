@@ -53,14 +53,14 @@ class Event::Kind < ActiveRecord::Base
 
   class << self
     def list
-      with_translations.order(:deleted_at, 'event_kind_translations.label')
+      with_translations.order(:deleted_at, 'event_kind_translations.label').uniq
     end
   end
 
 
   ### INSTANCE METHODS
 
-  def to_s(format = :default)
+  def to_s(_format = :default)
     "#{short_name} (#{label})"
   end
 

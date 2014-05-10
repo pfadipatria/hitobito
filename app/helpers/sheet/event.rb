@@ -8,7 +8,29 @@
 module Sheet
   class Event < Base
     self.parent_sheet = Sheet::Group
-    self.has_tabs = true
+
+    tab 'global.tabs.info',
+        :group_event_path,
+        if: :show,
+        no_alt: true
+
+    tab 'events.tabs.participants',
+        :group_event_participations_path,
+        if: :index_participations,
+        alt: [:group_event_roles_path],
+        params: { returning: true }
+
+    tab 'activerecord.models.event/application.other',
+        :group_event_application_market_index_path,
+        if: lambda { |view, _group, event|
+          event.supports_applications && view.can?(:application_market, event)
+        }
+
+    tab 'activerecord.models.qualification.other',
+        :group_event_qualifications_path,
+        if: lambda { |view, _group, event|
+          event.course_kind? && event.qualifying? && view.can?(:qualify, event)
+        }
 
     def link_url
       view.group_event_path(parent_sheet.entry.id, entry.id)

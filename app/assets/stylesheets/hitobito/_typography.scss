@@ -91,12 +91,17 @@ dl {
 }
 
 // Table
-.table {
+table.table {
   border-bottom: 1px solid $borderColor;
+}
+
+div.table {
+  margin-top: 30px;
 }
 
 .table, .table-basic {
   td, th {
+    padding: 4px;
     padding-left: 0;
     border-color: $borderColor; // new
     &:last-child { padding-right: 0; }
@@ -154,5 +159,12 @@ legend {
 }
 
 .nowrap {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+a.anchor {
+  color: inherit;
+  text-decoration: none;
 }

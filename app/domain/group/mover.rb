@@ -23,7 +23,9 @@ class Group::Mover < Struct.new(:group)
   end
 
   def possible_groups
-    group.hierarchy.collect { |g| g.self_and_siblings.without_deleted.order_by_type }.flatten
+    group.hierarchy.collect do |g|
+      g.self_and_siblings.without_deleted.order_by_type
+    end.flatten
   end
 
   def matching_childgroup?(candidate)

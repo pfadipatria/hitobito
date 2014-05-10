@@ -7,7 +7,34 @@
 
 module Sheet
   class Group < Base
-    self.has_tabs = true
+    tab 'global.tabs.info',
+        :group_path,
+        no_alt: true
+
+    tab 'activerecord.models.person.other',
+        :group_people_path,
+        if: :index_people,
+        alt: [:group_roles_path, :new_group_csv_imports_path],
+        params: { returning: true }
+
+    ::Event.all_types.each do |type|
+      tab "activerecord.models.#{type.model_name.i18n_key}.other",
+          "#{type.type_name}_group_events_path",
+          params: { returning: true },
+          if: lambda { |view, group|
+            group.event_types.include?(type) && view.can?(:index_events, group)
+          }
+    end
+
+    tab 'activerecord.models.mailing_list.other',
+        :group_mailing_lists_path,
+        if: :index_mailing_lists,
+        params: { returning: true }
+
+    tab 'groups.tabs.deleted',
+        :deleted_subgroups_group_path,
+        if: :deleted_subgroups
+
 
     delegate :group_path, to: :view
 
@@ -27,6 +54,14 @@ module Sheet
 
     def title
       entry.deleted? ? "#{super} #{translate(:deleted)}" : super
+    end
+
+    def left_nav?
+      true
+    end
+
+    def render_left_nav
+      NavLeft.new(self).render
     end
 
     private

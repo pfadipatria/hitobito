@@ -57,13 +57,13 @@ class QualificationKind < ActiveRecord::Base
 
   class << self
     def list
-      with_translations.order(:deleted_at, 'qualification_kind_translations.label')
+      with_translations.order(:deleted_at, 'qualification_kind_translations.label').uniq
     end
   end
 
   ### INSTANCE METHODS
 
-  def to_s(format = :default)
+  def to_s(_format = :default)
     label
   end
 

@@ -14,9 +14,11 @@ module CrudHelper
   def entry_form(*attrs, &block)
     options = attrs.extract_options!
     options[:buttons_bottom] = true unless options.key?(:buttons_bottom)
-    options[:cancel_url] ||= controller.is_a?(SimpleCrudController) ?
-        polymorphic_path(path_args(model_class), returning: true) :
-        polymorphic_path(path_args(entry))
+    options[:cancel_url] ||= if controller.is_a?(SimpleCrudController)
+                               polymorphic_path(path_args(model_class), returning: true)
+                             else
+                               polymorphic_path(path_args(entry))
+                             end
     attrs = attrs_or_default(attrs) { default_attrs - [:created_at, :updated_at] }
     crud_form(path_args(entry), *attrs, options, &block)
   end
@@ -38,10 +40,10 @@ module CrudHelper
       content << save_form_buttons(form, submit_label, cancel_url)
 
       content << if block_given?
-        capture(form, &block)
-      else
-        form.labeled_input_fields(*attrs)
-      end
+                   capture(form, &block)
+                 else
+                   form.labeled_input_fields(*attrs)
+                 end
 
       content << save_form_buttons(form, submit_label, cancel_url) if buttons_bottom
 
@@ -76,7 +78,7 @@ module CrudHelper
     else
       attrs = attrs_or_default(attrs) { default_attrs }
       list_table(*attrs) do |t|
-         add_table_actions(t)
+        add_table_actions(t)
       end
     end
   end
@@ -186,7 +188,7 @@ module CrudHelper
 
   # If a block is given, call it to get the path for the current row entry.
   # Otherwise, return the standard path args.
-  def action_path(e, &block)
+  def action_path(e)
     block_given? ? yield(e) : path_args(e)
   end
 

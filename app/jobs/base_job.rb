@@ -12,6 +12,10 @@ class BaseJob
   # Used as airbrake information when the job fails.
   class_attribute :parameters
 
+  def initialize
+    store_locale
+  end
+
   def perform
     # override in subclass
   end
@@ -20,7 +24,7 @@ class BaseJob
     Delayed::Job.enqueue(self, options)
   end
 
-  def error(job, exception, payload = parameters)
+  def error(_job, exception, payload = parameters)
     logger.error(exception.message)
     logger.error(exception.backtrace.join("\n"))
     Airbrake.notify(exception, cgi_data: ENV.to_hash, parameters: payload)
@@ -32,6 +36,14 @@ class BaseJob
 
   def logger
     Delayed::Worker.logger || Rails.logger
+  end
+
+  def store_locale
+    @locale = I18n.locale.to_s
+  end
+
+  def set_locale
+    I18n.locale = @locale || I18n.default_locale
   end
 
   def parameters
