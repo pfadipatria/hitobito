@@ -17,16 +17,16 @@ module StandardHelper
   # Formats a single value
   def f(value)
     case value
-      when Float, BigDecimal then
-        number_with_precision(value,
-                              precision: t('number.format.precision'),
-                              delimiter: t('number.format.delimiter'))
-      when Date   then l(value)
-      when Time   then l(value, format: :time)
-      when true   then t(:"global.yes")
-      when false  then t(:"global.no")
-      when nil    then EMPTY_STRING
-      else value.to_s
+    when Float, BigDecimal then
+      number_with_precision(value,
+                            precision: t('number.format.precision'),
+                            delimiter: t('number.format.delimiter'))
+    when Date   then l(value)
+    when Time   then l(value, format: :time)
+    when true   then t(:"global.yes")
+    when false  then t(:"global.no")
+    when nil    then EMPTY_STRING
+    else value.to_s
     end
   end
 
@@ -36,11 +36,7 @@ module StandardHelper
   # If the value is an associated model, renders the label of this object.
   # Otherwise, calls format_type.
   def format_attr(obj, attr)
-    format_type_attr_method = obj.class.respond_to?(:base_class) ?
-        "format_#{obj.class.base_class.name.underscore}_#{attr.to_s}" :
-        "format_#{obj.class.name.underscore}_#{attr.to_s}"
-    format_type_attr_method = format_type_attr_method.gsub(%r{/}, '_')  # deal with nested models
-
+    format_type_attr_method = format_type_attr_method(obj, attr)
     format_attr_method = :"format_#{attr.to_s}"
     if respond_to?(format_type_attr_method)
       send(format_type_attr_method, obj)
@@ -53,6 +49,14 @@ module StandardHelper
     else
       format_type(obj, attr)
     end
+  end
+
+  def format_type_attr_method(obj, attr)
+    if obj.class.respond_to?(:base_class)
+      "format_#{obj.class.base_class.name.underscore}_#{attr}"
+    else
+      "format_#{obj.class.name.underscore}_#{attr}"
+    end.gsub(/\//, '_')  # deal with nested models
   end
 
 
@@ -77,7 +81,7 @@ module StandardHelper
 
   # Renders a list of attributes with label and value for a given object.
   # If the optional block returns false for a given attribute, it will not be rendered.
-  def render_attrs(obj, *attrs, &block)
+  def render_attrs(obj, *attrs)
     content_tag(:dl, class: 'dl-horizontal') do
       safe_join(attrs) do |a|
         labeled_attr(obj, a) if !block_given? || yield(a)
@@ -101,7 +105,7 @@ module StandardHelper
   # If a block is given, the columns defined therein are appended to the attribute columns.
   # If entries is empty, an appropriate message is rendered.
   # An options hash may be given as the last argument.
-  def table(entries, *attrs, &block)
+  def table(entries, *attrs)
     entries.to_a # force evaluation of relation
     if entries.present?
       content_tag(:div, class: 'table-responsive') do
@@ -141,7 +145,7 @@ module StandardHelper
   # Renders a simple unordered list, which will
   # simply render all passed items or yield them
   # to your block.
-  def simple_list(items, ul_options = {}, &blk)
+  def simple_list(items, ul_options = {})
     content_tag_nested(:ul, items, ul_options) do |item|
       content_tag(:li, block_given? ? yield(item) : f(item))
     end
@@ -156,7 +160,7 @@ module StandardHelper
   # Overridden method that takes a block that is executed for each item in array
   # before appending the results.
   def safe_join(array, sep = $OUTPUT_FIELD_SEPARATOR, &block)
-    super(block_given? ? array.collect(&block) : array, sep)
+    super(block_given? ? array.collect(&block).compact : array, sep)
   end
 
 
@@ -172,7 +176,7 @@ module StandardHelper
   #  - global.{key}
   def translate_inheritable(key, variables = {})
     defaults = []
-    partial = @virtual_path ? @virtual_path.gsub(%r{.*/_?}, '') : nil
+    partial = @virtual_path ? @virtual_path.gsub(/.*\/_?/, '') : nil
     current = controller.class
     while current < ActionController::Base
       folder = current.controller_path
@@ -272,7 +276,7 @@ module StandardHelper
   # Returns the name of the attr and it's corresponding field
   def assoc_and_id_attr(attr)
     attr = attr.to_s
-    attr, attr_id = if attr.end_with?('_id')
+    if attr.end_with?('_id')
       [attr[0..-4], attr]
     elsif attr.end_with?('_ids')
       [attr[0..-5].pluralize, attr]
@@ -284,12 +288,12 @@ module StandardHelper
   def format_column(type, val)
     return EMPTY_STRING if val.nil?
     case type
-      when :time    then f(val.to_time)
-      when :date    then f(val.to_date)
-      when :datetime, :timestamp then "#{f(val.to_date)} #{f(val.to_time)}"
-      when :text    then val.present? ? simple_format(h(val)) : EMPTY_STRING
-      when :decimal then f(val.to_s.to_f)
-      else f(val)
+    when :time    then f(val.to_time)
+    when :date    then f(val.to_date)
+    when :datetime, :timestamp then "#{f(val.to_date)} #{f(val.to_time)}"
+    when :text    then val.present? ? simple_format(h(val)) : EMPTY_STRING
+    when :decimal then f(val.to_s.to_f)
+    else f(val)
     end
   end
 
@@ -308,7 +312,8 @@ module StandardHelper
 
   # Formats an active record belongs_to association
   def format_assoc(obj, assoc)
-    if val = obj.send(assoc.name)
+    val = obj.send(assoc.name)
+    if val
       assoc_link(val)
     else
       ta(:no_entry, assoc)
@@ -337,10 +342,6 @@ module StandardHelper
   def assoc_link?(val)
     respond_to?("#{val.class.base_class.model_name.singular_route_key}_path".to_sym) &&
     can?(:show, val)
-  end
-
-  def model_link(val)
-
   end
 
   def object_class(obj)

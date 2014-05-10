@@ -18,16 +18,9 @@ class Event::RegisterController < ApplicationController
   end
 
   def check
-    if params[:person][:email].present?
-      if user = Person.find_by_email(params[:person][:email])
-        Event::SendRegisterLoginJob.new(user, group, event).enqueue!
-        flash.now[:notice] = translate(:person_found) + "\n\n" + translate(:email_sent)
-        render 'index'
-      else
-        @person = Person.new(email: params[:person][:email])
-        flash.now[:notice] = translate(:form_data_missing)
-        render 'register'
-      end
+    email = params[:person][:email].to_s
+    if email.present?
+      check_email(email)
     else
       flash.now[:alert] = translate(:email_missing)
       render 'index'
@@ -46,12 +39,31 @@ class Event::RegisterController < ApplicationController
 
   private
 
+  def check_email(email)
+    user = Person.find_by_email(email)
+    if user
+      send_login_and_render_index(user)
+    else
+      register_new_person(email)
+    end
+  end
+
+  def send_login_and_render_index(user)
+    Event::SendRegisterLoginJob.new(user, group, event).enqueue!
+    flash.now[:notice] = translate(:person_found) + "\n\n" + translate(:email_sent)
+    render 'index'
+  end
+
+  def register_new_person(email)
+    @person = Person.new(email: email)
+    flash.now[:notice] = translate(:form_data_missing)
+    render 'register'
+  end
+
   def assert_external_application_possible
     if event.external_applications?
       if event.application_possible?
-        if current_user
-          redirect_to show_event_path
-        end
+        redirect_to show_event_path if current_user
       else
         flash[:alert] = translate(:application_window_closed)
         application_not_possible

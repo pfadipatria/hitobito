@@ -294,7 +294,7 @@ de:
       sign_out: 'Ausloggen'
 
     unauthorized:
-      forgot_password: 'Password vergessen?'
+      forgot_password: 'Passwort vergessen?'
 
     application:
       available_under_license: 'verfügbar unter der'
@@ -496,7 +496,7 @@ de:
         alternative_dates_info: 'Bitte gib weitere Kurse an, welche dir gehen würden.'
         course_information: 'Informationen zu den Kursen'
       priorities:
-        alternative_course: '%{number} Ausweichkurs'
+        alternative_course: "%{number}. Ausweichkurs"
 
     register:
       register:
@@ -614,6 +614,7 @@ de:
   sheet/group:
     belongs_to: 'gehört zu'
     deleted: '(gelöscht)'
+    layer_upwards: '< zu übergeordneter Ebene'
 
   label_formats:
     form:

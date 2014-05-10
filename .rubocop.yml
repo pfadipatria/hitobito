@@ -1,14 +1,18 @@
 AllCops:
   RunRailsCops: true
-  Excludes:
-    - db/**
-    - config/**
-    - bin/**
-    - spec/**
-    - vendor/**
-    - tmp/**
+  Exclude:
+    - Rakefile
+    - db/**/*
+    - config/**/*
+    - bin/**/*
+    - spec/**/*
+    - vendor/**/*
+    - tmp/**/*
     - app/assets/config.rb
 
+# This cop is currently buggy (0.21.0)
+Delegate:
+  Enabled: false
 
 ClassLength:
   Max: 200

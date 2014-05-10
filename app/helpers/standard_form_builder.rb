@@ -124,14 +124,14 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
   # Render a select with minutes
   def minutes_select(attr, html_options = {})
     html_options[:class] ||= 'time'
-    ma = (0..59).collect { |n| ['%02d' % n, n] }
+    ma = (0..59).collect { |n| [format('%02d', n), n] }
     select(attr, ma, {}, html_options)
   end
 
   # Render a select with hours
   def hours_select(attr, html_options = {})
     html_options[:class] ||= 'time'
-    ma = (0..23).collect { |n| ['%02d' % n, n] }
+    ma = (0..23).collect { |n| [format('%02d', n), n] }
     select(attr, ma, {}, html_options)
   end
 
@@ -201,10 +201,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     html_options[:class] ||= 'span6'
     list = association_entries(attr, html_options)
     if list.present?
-      collection_select(attr,
-                        list,
-                        :id,
-                        :to_s,
+      collection_select(attr, list, :id, :to_s,
                         collection_prompt(attr, html_options),
                         html_options)
     else
@@ -212,6 +209,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
+  # rubocop:disable PredicateName
 
   # Render a multi select element for a :has_many or :has_and_belongs_to_many
   # association defined by attr.
@@ -225,7 +223,9 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     belongs_to_field(attr, html_options)
   end
 
-  def person_field(attr, html_options = {})
+  # rubocop:enable PredicateName
+
+  def person_field(attr, _html_options = {})
     attr, attr_id = assoc_and_id_attr(attr)
     hidden_field(attr_id) +
     string_field(attr,
@@ -239,7 +239,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
   def labeled_inline_fields_for(assoc, partial_name = nil, &block)
     content_tag(:div, class: 'control-group') do
       label(assoc, class: 'control-label') +
-      nested_fields_for(assoc, partial_name, 'controls controls-row') do |fields|
+      nested_fields_for(assoc, partial_name) do |fields|
         content = block_given? ? capture(fields, &block) : render(partial_name, f: fields)
 
         content << help_inline(fields.link_to_remove(I18n.t('global.associations.remove')))
@@ -248,15 +248,15 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
-  def nested_fields_for(assoc, partial_name = nil, control_class = nil, &block)
-      content_tag(:div, id: "#{assoc}_fields") do
-        fields_for(assoc) do |fields|
-          block_given? ? capture(fields, &block) : render(partial_name, f: fields)
-        end
-      end +
-      content_tag(:div, class: 'controls') do
-        help_inline(link_to_add I18n.t('global.associations.add'), assoc)
+  def nested_fields_for(assoc, partial_name = nil, &block)
+    content_tag(:div, id: "#{assoc}_fields") do
+      fields_for(assoc) do |fields|
+        block_given? ? capture(fields, &block) : render(partial_name, f: fields)
       end
+    end +
+    content_tag(:div, class: 'controls') do
+      help_inline(link_to_add I18n.t('global.associations.add'), assoc)
+    end
   end
 
   def error_messages
@@ -323,7 +323,8 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
   # To add an additional help text, use the help option.
   # E.g. labeled_boolean_field(:checked, :help => 'Some Help')
   def method_missing(name, *args)
-    if field_method = labeled_field_method?(name)
+    field_method = labeled_field_method?(name)
+    if field_method
       build_labeled_field(field_method, *args)
     else
       super(name, *args)
@@ -384,10 +385,10 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
 
   def errors_on?(attr)
     attr_plain, attr_id = assoc_and_id_attr(attr)
-    # rubocop:disable HashMethods
+    # rubocop:disable DeprecatedHashMethods
     @object.errors.has_key?(attr_plain.to_sym) ||
     @object.errors.has_key?(attr_id.to_sym)
-    # rubocop:enable HashMethods
+    # rubocop:enable DeprecatedHashMethods
   end
 
   # Returns true if the given attribute must be present.
@@ -412,7 +413,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
- def build_labeled_field(field_method, *args)
+  def build_labeled_field(field_method, *args)
     options = args.extract_options!
     help = options.delete(:help)
     help_inline = options.delete(:help_inline)
@@ -427,7 +428,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
   end
 
   def id_from_value(attr, value)
-    "#{attr}_#{value.to_s.gsub(/\s/, "_").gsub(/[^-\w]/, "").downcase}"
+    "#{attr}_#{value.to_s.gsub(/\s/, '_').gsub(/[^-\w]/, '').downcase}"
   end
 
 end
