@@ -15,7 +15,7 @@ describe Export::Csv::People::PeopleFull do
 
   subject { people_list }
 
-  its(:attributes) do should eq [:first_name, :last_name, :company_name, :nickname, :company, :email, :address,
+  its(:attributes) do should eq [:first_name, :last_name, :company_name, :profession, :nickname, :company, :email, :address,
                                  :zip_code, :town, :country, :gender, :birthday, :additional_information, :roles] end
 
   context '#attribute_labels' do
@@ -36,7 +36,7 @@ describe Export::Csv::People::PeopleFull do
   context 'integration' do
 
     let(:full_headers) do
-      ['Vorname', 'Nachname', 'Firmenname', 'Übername', 'Firma', 'E-Mail',
+      ['Vorname', 'Nachname', 'Firmenname', 'Übername', 'Firma', 'Beruf', 'Haupt-E-Mail',
        'Adresse', 'PLZ', 'Ort', 'Land', 'Geschlecht', 'Geburtstag',
        'Zusätzliche Angaben', 'Rollen']
     end
@@ -52,12 +52,14 @@ describe Export::Csv::People::PeopleFull do
         person.update_attribute(:gender, 'm')
         person.social_accounts << SocialAccount.new(label: 'skype', name: 'foobar')
         person.phone_numbers << PhoneNumber.new(label: 'vater', number: 123, public: false)
+        person.additional_emails << AdditionalEmail.new(label: 'vater', email: 'vater@example.com', public: false)
       end
 
       subject { csv[0] }
 
       its(['Rollen']) { should eq 'Leader TopGroup' }
       its(['Telefonnummer Vater']) { should eq '123' }
+      its(['Weitere E-Mail Vater']) { should eq 'vater@example.com' }
       its(['Social Media Adresse Skype']) { should eq 'foobar' }
       its(['Geschlecht']) { should eq 'm' }
     end

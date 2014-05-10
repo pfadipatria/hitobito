@@ -6,9 +6,10 @@
 #  https://github.com/hitobito/hitobito.
 
 ThinkingSphinx::Index.define_partial :person do
-  indexes first_name, last_name, company_name, nickname, company, email, sortable: true
+  indexes first_name, last_name, company_name, profession, nickname, company, email, sortable: true
   indexes address, zip_code, town, country, birthday, additional_information
 
   indexes phone_numbers.number, as: :phone_number
   indexes social_accounts.name, as: :social_account
+  indexes additional_emails.email, as: :additional_email
 end

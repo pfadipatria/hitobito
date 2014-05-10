@@ -111,7 +111,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
       raw
     else
       val = @object.send(attr)
-      val.is_a?(Date) ? template.l(@object.send(attr)) : val
+      val.is_a?(Date) ? template.l(val) : val
     end
   end
 
@@ -234,6 +234,17 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
                  data: { provide: 'entity',
                          id_field: "#{object_name}_#{attr_id}",
                          url: @template.query_people_path })
+  end
+  
+    def telsearch_field(attr, html_options = {})
+    attr, attr_id = assoc_and_id_attr(attr)
+    hidden_field(attr_id) +
+    string_field(attr,
+                 placeholder: I18n.t('global.search.placeholder_with_model',
+                                     model: Person.model_name.human),
+                 data: { provide: 'entity',
+                         id_field: "#{object_name}_#{attr_id}",
+                         url: @template.telsearch_people_path })
   end
 
   def labeled_inline_fields_for(assoc, partial_name = nil, &block)

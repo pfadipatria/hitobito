@@ -36,7 +36,7 @@ module Import
       params[header] &&
         (person_fields.find { |field| field[:key] == params[header] } ||
          null_field)
-    end
+  end
 
     def import_person_field(header)
       person_fields.find { |field| field[:value].downcase[header.downcase] }

@@ -19,8 +19,8 @@ module Concerns
     end
 
     def render_emails(people)
-      text = people.collect(&:email).compact.join(',')
-      render text: text
+      emails = Person.mailing_emails_for(people)
+      render text: emails.join(',')
     end
 
   end

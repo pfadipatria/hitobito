@@ -5,6 +5,7 @@
 #  or later. See the COPYING file at the top-level directory or at
 #  https://github.com/hitobito/hitobito.
 
+
 # == Schema Information
 #
 # Table name: events
@@ -26,13 +27,12 @@
 #  state                  :string(60)
 #  priorization           :boolean          default(FALSE), not null
 #  requires_approval      :boolean          default(FALSE), not null
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
+#  created_at             :datetime
+#  updated_at             :datetime
 #  participant_count      :integer          default(0)
 #  application_contact_id :integer
 #  external_applications  :boolean          default(FALSE)
 #
-
 class Event < ActiveRecord::Base
 
   # This statement is required because these classes would not be loaded correctly otherwise.

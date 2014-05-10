@@ -3,6 +3,7 @@
 -#  or later. See the COPYING file at the top-level directory or at
 -#  https://github.com/hitobito/hitobito.
 
+
 #main.row-fluid
   .span7
     = entry_form(cancel_url: role_cancel_url) do |f|
@@ -18,7 +19,7 @@
         = render 'person_fields', f: f
         = field_set_tag Role.model_name.human do
           = render 'fields', f: f
-
+          
   .span5
     %br/
     %br/

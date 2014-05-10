@@ -95,6 +95,11 @@ de:
       placeholder_value: Website, Skypename, Profillink...
       placeholder_type: Art (Skype, Facebook...)
 
+    additional_email_fields:
+      placeholder_value: E-Mail
+      placeholder_type: Bezeichnung (Privat, Arbeit ..)
+      tooltip_mailings: Versände von Abos, Bestätigungen per E-Mail usw. werden zusätzlich an alle hier markierten Adressen verschickt.
+
   participations:
     destroy:
       flash:
@@ -109,7 +114,7 @@ de:
         Falls ein Feldwert selber Kommas enthält, muss er mit Anführungszeichen (") ergänzt werden.
         Beispiel:'
       example: |
-        Vorname,Nachname,Email,Ort,Geschlecht
+        Vorname,Nachname,E-Mail,Ort,Geschlecht
         Hans,Muster,hans@beispiel.ch,Bern,m
         Vreni,Bischofsberger,vreni@beispiel.net,"Zürich, New York",w
       explain_field_names: Es können beliebige Feldnamen verwendet werden.
@@ -182,8 +187,18 @@ de:
 
     person_fields:
       create_new_person: Neue Person erfassen
+<<<<<<< HEAD
+      search_existing_person: Bestehende Person
+=======
       search_existing_person: Bestehende Person suchen
 
+    info:
+      role_has_permissions: "Die Rolle %{role} in der Gruppe %{group} hat folgende Berechtigungen:"
+      role_only_public: >
+        Die Rolle %{role} in der Gruppe %{group} kann nur öffentliche Daten
+        (Gruppen, Anlässe und Abos; keine anderen Personen) sehen.
+      only_visible_from_above: Diese Rolle ist nur von Personen in dieser Ebene sichtbar, nicht von Personen aus darüber liegenden Ebenen.
+>>>>>>> c1fc0a841fa30b2cd49a07f24219bff3435e5def
 
   people:
     send_password_instructions: Login Informationen wurden verschickt.
@@ -198,14 +213,26 @@ de:
     actions_index:
       import_list: Liste importieren
 
+    attrs:
+      additional_data: Weitere Angaben
+
     fields:
       format_birthday: (dd.mm.yy)
+
+    log:
+      no_changes: Bisher wurden keine Änderungen aufgezeichnet.
 
     roles:
       title: Aktive Rollen
 
     roles_aside:
       set_main_group: Hauptgruppe setzen
+
+    email_field:
+      used_as_login: Wird als Login verwendet
+      only_changeable_by_superior: >
+           Die Haupt-E-Mail Adresse einer Person mit mehreren Rollen kann nur
+           von einem über alle diese Rollen übergeordneten Benutzer geändert werden.
 
   people_filters:
     form:
@@ -282,6 +309,8 @@ de:
       form:
         subgroups_selectable: 'Es können nur Gruppen unterhalb der Abogruppe ausgewählt werden'
         subgroups_and_siblings_selectable: 'Es können nur Gruppen unterhalb der Abogruppe oder unterhalb der benachbarten Gruppen vom Typ %{type} ausgewählt werden'
+      roles:
+        please_choose_group: Bitte wähle eine Gruppe aus
 
     exclude_person:
       form:
@@ -322,7 +351,7 @@ de:
     not_logged_in: "Du musst dich einloggen um dich für den Anlass '%{event}' anzumelden."
     person_found: 'Wir haben dich in unserer Datenbank gefunden.'
     email_sent: 'Wir haben dir ein E-Mail mit einem Link geschickt, wo du dich direkt für den Anlass anmelden kannst.'
-    email_missing: 'Bitte gib eine Emailadresse ein'
+    email_missing: 'Bitte gib eine E-Mail ein'
     form_data_missing: 'Bitte fülle das folgende Formular aus, bevor du dich für den Anlass anmeldest.'
     registered: 'Deine persönlichen Daten wurden aufgenommen. Bitte ergänze nun noch die Angaben für die Anmeldung.'
     application_window_closed: 'Das Anmeldefenster für diesen Anlass ist geschlossen.'
@@ -474,12 +503,13 @@ de:
 
     register:
       register:
-        title: 'Kontaktdaten erfassen'
+        title: Kontaktdaten erfassen
       index:
-        login: 'Login'
-        no_login: 'Du hast noch kein Login?'
+        login: Login
+        no_login: Du hast noch kein Login?
       email_check:
-        next: 'Weiter'
+        next: Weiter
+        enter_email: Bitte gib deine E-Mailadresse ein, damit du dich für den Anlass anmelden kannst.
 
 
   events:
@@ -492,6 +522,7 @@ de:
       caption_prioritization: 'Teilnehmende können bei der Anmeldung zwei weitere Kurse als Alternativen angeben'
       caption_requires_approval: 'Der Scharleiter wird informiert und muss die Anmeldung bestätigen'
       additional_information: 'Angaben für Anmeldung'
+      times_are_optional: Uhrzeiten sind optional
       explain_application_questions: Hier kannst du weitere Angaben für die Anmeldung verlangen.
         Gib mögliche Antworten mit Komma getrennt ein oder lass das Feld leer,
         um beliebige Antworten zu ermöglichen.
@@ -530,7 +561,7 @@ de:
 
   mailing_lists:
     form:
-      help_additional_sender: 'Neben den Administratoren darf diese Emailadresse ebenfalls Nachrichten an die Mailing Liste senden.'
+      help_additional_sender: 'Neben den Administratoren darf diese E-Mail ebenfalls Nachrichten an die Mailing Liste senden.'
       caption_subscribable: 'Abonnenten dürfen sich selbst an-/abmelden'
       caption_subscribers_may_post:  'Abonnenten dürfen auf die Mailingliste schreiben'
 
@@ -560,7 +591,7 @@ de:
     button: 'Export'
     csv: 'CSV'
     labels: 'Etiketten'
-    emails: 'Email Adressen'
+    emails: 'E-Mail Adressen'
     addresses: 'Adressliste'
     everything: 'Alle Angaben'
 
@@ -572,6 +603,13 @@ de:
     entire_layer: 'Gesamte Ebene'
     entire_group: 'Gesamte Gruppe'
     new_filter: 'Neuer Filter...'
+
+  filter_navigation/event/participations:
+    predefined_filters:
+      all: Alle Personen
+      teamers: Leitungsteam
+      participants: Teilnehmende
+
 
   sheet/csv_import:
     title: 'Personen über CSV importieren'

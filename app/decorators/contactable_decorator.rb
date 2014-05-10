@@ -28,6 +28,7 @@ module ContactableDecorator
     address_name +
     complete_address +
     primary_email +
+    all_additional_emails(true) +
     all_phone_numbers(true) +
     all_social_accounts(true)
   end
@@ -35,6 +36,18 @@ module ContactableDecorator
   def primary_email
     if email.present?
       content_tag(:p, h.mail_to(email))
+    end
+  end
+
+  def all_emails(only_public = true)
+    ''.html_safe <<
+      primary_email <<
+      all_additional_emails(only_public)
+  end
+
+  def all_additional_emails(only_public = true)
+    nested_values(additional_emails, only_public) do |email|
+      h.mail_to(email)
     end
   end
 
@@ -48,19 +61,19 @@ module ContactableDecorator
     end
   end
 
+  private
+
   def nested_values(values, only_public)
     html = values.collect do |v|
       if !only_public || v.public?
         val = block_given? ? yield(v.value) : v.value
-        h.value_with_muted(val, v.label)
+        h.value_with_muted(val, v.translated_label)
       end
     end.compact
 
     html = h.safe_join(html, br)
     content_tag(:p, html) if html.present?
   end
-
-  private
 
   def br
     h.tag(:br)

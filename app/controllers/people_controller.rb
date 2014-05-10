@@ -6,6 +6,9 @@
 #  https://github.com/hitobito/hitobito.
 
 class PeopleController < CrudController
+  
+  #require'rest_client'
+  require 'rexml/document'
 
   include Concerns::RenderPeopleExports
 
@@ -14,12 +17,12 @@ class PeopleController < CrudController
 
   self.remember_params += [:name, :kind, :role_type_ids]
 
-  self.permitted_attrs = [:first_name, :last_name, :company_name, :nickname, :company,
+  self.permitted_attrs = [:first_name, :last_name, :company_name, :nickname, :company, :profession,
                           :gender, :birthday, :additional_information,
                           :picture, :remove_picture] +
                           Contactable::ACCESSIBLE_ATTRS
 
-  decorates :group, :person, :people, :versions
+  decorates :group, :person, :people, :versions, :telsearch
 
   helper_method :index_full_ability?
 
@@ -70,6 +73,10 @@ class PeopleController < CrudController
     end
 
     render json: people.collect(&:as_typeahead)
+  end
+  
+  def telsearch
+    puts "--------"
   end
 
   def history
@@ -158,7 +165,7 @@ class PeopleController < CrudController
   def set_entries(entries)
     @people = entries.page(params[:page])
     if index_full_ability?
-      @people = @people.includes(:phone_numbers)
+      @people = @people.includes(:additional_emails, :phone_numbers)
     else
       @people = @people.preload_public_accounts
     end
@@ -167,7 +174,7 @@ class PeopleController < CrudController
   def render_entries_csv(entries)
     full = params[:details].present? && index_full_ability?
     csv_entries = if full
-      entries.select('people.*').includes(:phone_numbers, :social_accounts)
+      entries.select('people.*').preload_accounts
     else
       entries.preload_public_accounts
     end

@@ -7,7 +7,6 @@
 = field_set_tag(title, class: 'person-fields', style: element_visible(!entry.person.changed?))do
   = f.labeled_person_field(:person)
 
-
 - title = capture do
   Neue Person erfassen
   %small
@@ -18,6 +17,13 @@
 
   = render('shared/error_messages', errors: entry.person.errors, object: entry.person)
 
+  = f.labeled_telsearch_field(:person)
+    
   = f.fields_for(:new_person, entry.person) do |fields|
     = field_set_tag do
+<<<<<<< HEAD
       = fields.labeled_input_fields :first_name, :last_name, :nickname, :company_name, :company, :email
+=======
+      = fields.labeled_input_fields :first_name, :last_name, :nickname, :company_name, :company
+      = fields.labeled_input_field :email, help_inline: t('people.email_field.used_as_login')
+>>>>>>> c1fc0a841fa30b2cd49a07f24219bff3435e5def
