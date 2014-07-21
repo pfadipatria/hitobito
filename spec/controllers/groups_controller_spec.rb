@@ -29,7 +29,23 @@ describe GroupsController do
     before { sign_in(person) }
     let(:group) { groups(:top_layer) }
 
-    describe 'show' do
+    describe 'GET index' do
+      context :html do
+        it 'keeps flash' do
+          get :index
+          should redirect_to(group_path(Group.root, format: :html))
+        end
+      end
+
+      context :json do
+        it 'redirects to json' do
+          get :index, format: :json
+          should redirect_to(group_path(Group.root, format: :json))
+        end
+      end
+    end
+
+    describe 'GET show' do
       subject { assigns(:sub_groups) }
 
       context 'sub_groups' do
@@ -50,6 +66,18 @@ describe GroupsController do
 
         its(:values) { should == [[groups(:bottom_group_one_one)]] }
       end
+
+      context :json do
+        render_views
+
+        it 'is valid' do
+          get :show, id: group.id, format: :json
+          json = JSON.parse(response.body)
+          group = json['groups'].first
+          group['links']['children'].should have(4).items
+        end
+      end
+
     end
 
     describe 'show, new then create' do

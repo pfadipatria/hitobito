@@ -23,7 +23,7 @@ class EventsController < CrudController
 
   decorates :event, :events, :group
 
-  prepend_before_action :authenticate_person_from_token!
+  prepend_before_action :authenticate_person_from_onetime_token!
   # load group before authorization
   prepend_before_action :parent
 
@@ -81,7 +81,7 @@ class EventsController < CrudController
 
   def load_kinds
     if entry.kind_class
-      @kinds = entry.kind_class.without_deleted
+      @kinds = entry.kind_class.list.without_deleted
       @kinds << entry.kind if entry.kind && entry.kind.deleted?
     end
   end

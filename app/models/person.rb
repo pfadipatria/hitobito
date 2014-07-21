@@ -43,12 +43,19 @@
 #  failed_attempts        :integer          default(0)
 #  locked_at              :datetime
 #  profession             :string(255)
-
+#  authentication_token   :string
+#
 class Person < ActiveRecord::Base
 
   PUBLIC_ATTRS = [:id, :first_name, :last_name, :nickname, :company_name, :company,
                   :email, :address, :zip_code, :town, :country, :gender, :birthday,
                   :picture, :primary_group_id, :profession]
+
+  INTERNAL_ATTRS = [:authentication_token, :contact_data_visible,  :created_at, :creator_id,
+                    :current_sign_in_at, :current_sign_in_ip, :encrypted_password, :id,
+                    :last_label_format_id, :failed_attempts, :last_sign_in_at, :last_sign_in_ip,
+                    :locked_at, :remember_created_at, :reset_password_token,
+                    :reset_password_sent_at, :sign_in_count, :updated_at, :updater_id]
 
   # define devise before other modules
   devise :database_authenticatable,
@@ -69,11 +76,7 @@ class Person < ActiveRecord::Base
             deleter: false
 
   has_paper_trail meta: { main_id: ->(p) { p.id }, main_type: sti_name },
-                  skip: [:id, :encrypted_password, :reset_password_token, :reset_password_sent_at,
-                         :remember_created_at, :sign_in_count, :current_sign_in_at,
-                         :current_sign_in_ip, :failed_attempts, :locked_at, :last_sign_in_at,
-                         :last_sign_in_ip, :contact_data_visible, :last_label_format_id,
-                         :picture, :created_at, :creator_id, :updated_at, :updater_id]
+                  skip: Person::INTERNAL_ATTRS + [:picture]
 
 
   ### ASSOCIATIONS
@@ -122,9 +125,13 @@ class Person < ActiveRecord::Base
 
   class << self
     def order_by_name
-      order(company_case_column(:company_name, :last_name),
-            company_case_column(:last_name, :first_name),
-            company_case_column(:first_name, :nickname))
+      order(order_by_name_statement)
+    end
+
+    def order_by_name_statement
+      [company_case_column(:company_name, :last_name),
+       company_case_column(:last_name, :first_name),
+       company_case_column(:first_name, :nickname)]
     end
 
     def only_public_data
@@ -238,6 +245,14 @@ class Person < ActiveRecord::Base
   rescue ActiveRecord::RecordNotUnique
     errors.add(:email, :taken)
     false
+  end
+
+  def years
+    if birthday?
+      now = Time.zone.now.to_date
+      extra = now.month > birthday.month || (now.month == birthday.month && now.day >= birthday.day)
+      now.year - birthday.year - (extra ? 0 : 1)
+    end
   end
 
   private

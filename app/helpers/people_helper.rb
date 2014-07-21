@@ -19,4 +19,21 @@ module PeopleHelper
     Dropdown::PeopleExport.new(self, current_user, params, details, emails).to_s
   end
 
+  def format_birthday(person)
+    if person.birthday?
+      f(person.birthday) << ' ' <<  t('people.years_old', years: person.years)
+    end
+  end
+
+  def sortable_grouped_person_attr(t, sortable_attrs, grouping_attr = nil, &block)
+    list = sortable_attrs.map do |attr|
+      t.sort_header(attr.to_sym, Person.human_attribute_name(attr.to_sym))
+    end
+
+    list.unshift(Person.human_attribute_name(grouping_attr.to_sym)) if grouping_attr
+
+    t.col(safe_join(list, ' | '), &block)
+  end
+
+
 end

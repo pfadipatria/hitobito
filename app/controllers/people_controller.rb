@@ -19,6 +19,8 @@ class PeopleController < CrudController
                           :picture, :remove_picture] +
                           Contactable::ACCESSIBLE_ATTRS
 
+  self.sort_mappings = { roles: [Person.order_by_role_statement].concat(Person.order_by_name_statement) }
+
   decorates :group, :person, :people, :versions
 
   helper_method :index_full_ability?
@@ -29,30 +31,33 @@ class PeopleController < CrudController
   prepend_before_action :entry, only: [:show, :edit, :update, :destroy,
                                        :send_password_instructions, :primary_group]
 
-  before_render_show :load_asides
+  before_render_show :load_asides, if: -> { request.format.html? }
 
   def index
     filter = Person::ListFilter.new(@group, current_user, params[:kind], params[:role_type_ids])
     entries = filter.filter_entries
+    entries = entries.reorder(sort_expression) if sorting?
     @multiple_groups = filter.multiple_groups
 
     respond_to do |format|
-      format.html { prepare_entries(entries) }
-      format.pdf  { render_pdf(entries) }
-      format.csv  { render_entries_csv(entries) }
+      format.html  { @people = prepare_entries(entries).page(params[:page]) }
+      format.pdf   { render_pdf(entries) }
+      format.csv   { render_entries_csv(entries) }
       format.email { render_emails(entries) }
+      format.json  { render_entries_json(entries) }
     end
   end
 
   def show
     if group.nil?
-      flash.keep
-      redirect_to person_home_path(entry)
+      flash.keep if request.format.html?
+      redirect_to person_home_path(entry, format: request.format.to_sym)
     else
       respond_to do |format|
-        format.html { entry }
+        format.html
         format.pdf  { render_pdf([entry]) }
         format.csv  { render_entry_csv }
+        format.json { render_entry_json }
       end
     end
   end
@@ -166,11 +171,10 @@ class PeopleController < CrudController
   end
 
   def prepare_entries(entries)
-    @people = entries.page(params[:page])
     if index_full_ability?
-      @people = @people.includes(:additional_emails, :phone_numbers)
+      entries.includes(:additional_emails, :phone_numbers)
     else
-      @people = @people.preload_public_accounts
+      entries.preload_public_accounts
     end
   end
 
@@ -197,6 +201,20 @@ class PeopleController < CrudController
     send_data csv, type: :csv
   end
 
+  def render_entries_json(entries)
+    render json: ListSerializer.new(prepare_entries(entries).
+                                      includes(:social_accounts).
+                                      decorate,
+                                    group: @group,
+                                    multiple_groups: @multiple_groups,
+                                    serializer: PeopleSerializer,
+                                    controller: self)
+  end
+
+  def render_entry_json
+    render json: PersonSerializer.new(entry.decorate, group: @group, controller: self)
+  end
+
   def index_full_ability?
     if params[:kind].blank?
       can?(:index_full_people, @group)
@@ -204,6 +222,8 @@ class PeopleController < CrudController
       can?(:index_deep_full_people, @group)
     end
   end
+  public :index_full_ability? # for serializer
+  hide_action :index_full_ability?
 
   def authorize_class
     authorize!(:index_people, group)
