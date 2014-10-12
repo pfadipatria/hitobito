@@ -11,14 +11,7 @@ describe PeopleController, js: true do
     Fabricate(Group::BottomGroup::Leader.name.to_sym, group: groups(:bottom_group_one_two))
 
     obsolete_node_safe do
-      sign_in
-      visit group_people_path(group)
-
-      page.should_not have_selector('.table tbody tr')
-
-      # create a new filter
-      click_link 'Weitere Ansichten'
-      click_link 'Neuer Filter...'
+      sign_in_and_create_filter
 
       find("#people_filter_role_type_ids_#{Group::BottomLayer::Leader.id}").set(true)
       find("#people_filter_role_type_ids_#{Group::BottomLayer::Member.id}").set(true)
@@ -52,5 +45,42 @@ describe PeopleController, js: true do
       click_link 'Externe'
       page.should_not have_selector('.table-striped tbody tr')
     end
+  end
+
+  context 'toggling roles' do
+    it 'toggles roles when clicking layer' do
+      obsolete_node_safe do
+        sign_in_and_create_filter
+
+        find('h4.filter-toggle', text: 'Top Layer').click
+        page.should have_css('input:checked', count: 3)
+
+        find('h4.filter-toggle', text: 'Top Layer').click
+        page.should have_css('input:checked', count: 0)
+      end
+    end
+
+    it 'toggles roles when clicking group' do
+      obsolete_node_safe do
+        sign_in_and_create_filter
+
+        find('label.filter-toggle', text: 'Top Group').click
+        page.should have_css('input:checked', count: 3)
+
+        find('label.filter-toggle', text: 'Top Group').click
+        page.should have_css('input:checked', count: 0)
+      end
+    end
+  end
+
+  def sign_in_and_create_filter
+    sign_in
+    visit group_people_path(group)
+    page.should_not have_selector('.table tbody tr')
+
+    click_link 'Weitere Ansichten'
+    click_link 'Neuer Filter...'
+
+    page.should have_css('input:checked', count: 0)
   end
 end

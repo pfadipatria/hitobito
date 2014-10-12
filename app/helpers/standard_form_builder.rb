@@ -1,10 +1,11 @@
 # encoding: utf-8
-# rubocop:disable ClassLength
 
 #  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
 #  hitobito and licensed under the Affero General Public License version 3
 #  or later. See the COPYING file at the top-level directory or at
 #  https://github.com/hitobito/hitobito.
+
+# rubocop:disable ClassLength
 
 # A form builder that automatically selects the corresponding input field
 # for ActiveRecord column types. Convenience methods for each column type allow
@@ -32,6 +33,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
   # Render a corresponding input field for the given attribute.
   # The input field is chosen based on the ActiveRecord column type.
   # Use additional html_options for the input element.
+  # rubocop:disable Metrics/PerceivedComplexity
   def input_field(attr, html_options = {})
     type = column_type(@object, attr)
     custom_field_method = :"#{type}_field"
@@ -51,6 +53,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
       text_field(attr, html_options)
     end
   end
+  # rubocop:enable Metrics/PerceivedComplexity
 
   # Render a password field
   def password_field(attr, html_options = {})
@@ -365,8 +368,15 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     content_tag(:div, class: 'control-group hp') do
       label(name, name, class: 'control-label') +
       content_tag(:div, class: 'controls') do
-        text_field(name, value: nil, placeholder: 'Bitte dieses Feld nicht ausfüllen')
+        text_field(name, value: nil, placeholder: I18n.t('global.do_not_fill'))
       end
+    end
+  end
+
+  def with_addon(addon, content = nil)
+    content_tag(:div, class: 'input-append') do
+      (block_given? ? yield : content) +
+        content_tag(:span, addon, class: 'add-on')
     end
   end
 
@@ -417,10 +427,19 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     options = args.extract_options!
     help = options.delete(:help)
     help_inline = options.delete(:help_inline)
+    caption = options.delete(:caption)
+    addon = options.delete(:addon)
+
+    labeled_args = [args.first]
+    labeled_args << caption if caption.present?
+
     text = send(field_method, *(args << options)) + required_mark(args.first)
+    text = with_addon(addon, text) if addon.present?
     text << help_inline(help_inline) if help_inline.present?
     text << help_block(help) if help.present?
-    labeled(args.first, text)
+    labeled_args << text
+
+    labeled(*labeled_args)
   end
 
   def klass

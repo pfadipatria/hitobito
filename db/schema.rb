@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140721083911) do
+ActiveRecord::Schema.define(version: 20140813074515) do
 
   create_table "additional_emails", force: true do |t|
     t.integer "contactable_id",                  null: false
@@ -78,7 +78,17 @@ ActiveRecord::Schema.define(version: 20140721083911) do
     t.datetime "start_at"
     t.datetime "finish_at"
     t.string   "location"
+    t.index ["event_id", "start_at"], :name => "index_event_dates_on_event_id_and_start_at"
     t.index ["event_id"], :name => "index_event_dates_on_event_id"
+  end
+
+  create_table "event_kind_qualification_kinds", force: true do |t|
+    t.integer "event_kind_id",         null: false
+    t.integer "qualification_kind_id", null: false
+    t.string  "category",              null: false
+    t.string  "role",                  null: false
+    t.index ["category"], :name => "index_event_kind_qualification_kinds_on_category"
+    t.index ["role"], :name => "index_event_kind_qualification_kinds_on_role"
   end
 
   create_table "event_kind_translations", force: true do |t|
@@ -97,24 +107,6 @@ ActiveRecord::Schema.define(version: 20140721083911) do
     t.datetime "updated_at"
     t.datetime "deleted_at"
     t.integer  "minimum_age"
-  end
-
-  create_table "event_kinds_preconditions", force: true do |t|
-    t.integer "event_kind_id",         null: false
-    t.integer "qualification_kind_id", null: false
-    t.index ["event_kind_id", "qualification_kind_id"], :name => "index_event_kinds_preconditions", :unique => true
-  end
-
-  create_table "event_kinds_prolongations", force: true do |t|
-    t.integer "event_kind_id",         null: false
-    t.integer "qualification_kind_id", null: false
-    t.index ["event_kind_id", "qualification_kind_id"], :name => "index_event_kinds_prolongations", :unique => true
-  end
-
-  create_table "event_kinds_qualification_kinds", force: true do |t|
-    t.integer "event_kind_id",         null: false
-    t.integer "qualification_kind_id", null: false
-    t.index ["event_kind_id", "qualification_kind_id"], :name => "index_event_kinds_qualification_kinds", :unique => true
   end
 
   create_table "event_participations", force: true do |t|
@@ -136,6 +128,7 @@ ActiveRecord::Schema.define(version: 20140721083911) do
     t.string  "question"
     t.string  "choices"
     t.boolean "multiple_choices", default: false
+    t.boolean "required"
     t.index ["event_id"], :name => "index_event_questions_on_event_id"
   end
 
@@ -149,7 +142,7 @@ ActiveRecord::Schema.define(version: 20140721083911) do
 
   create_table "events", force: true do |t|
     t.string   "type"
-    t.string   "name",                                              null: false
+    t.string   "name",                                                        null: false
     t.string   "number"
     t.string   "motto"
     t.string   "cost"
@@ -161,14 +154,15 @@ ActiveRecord::Schema.define(version: 20140721083911) do
     t.date     "application_closing_at"
     t.text     "application_conditions"
     t.integer  "kind_id"
-    t.string   "state",                  limit: 60
-    t.boolean  "priorization",                      default: false, null: false
-    t.boolean  "requires_approval",                 default: false, null: false
+    t.string   "state",                            limit: 60
+    t.boolean  "priorization",                                default: false, null: false
+    t.boolean  "requires_approval",                           default: false, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "participant_count",                 default: 0
+    t.integer  "participant_count",                           default: 0
     t.integer  "application_contact_id"
-    t.boolean  "external_applications",             default: false
+    t.boolean  "external_applications",                       default: false
+    t.integer  "representative_participant_count",            default: 0
     t.index ["kind_id"], :name => "index_events_on_kind_id"
   end
 
@@ -214,15 +208,15 @@ ActiveRecord::Schema.define(version: 20140721083911) do
   end
 
   create_table "label_formats", force: true do |t|
-    t.string  "page_size",        default: "A4",  null: false
-    t.boolean "landscape",        default: false, null: false
-    t.float   "font_size",        default: 11.0,  null: false
-    t.float   "width",                            null: false
-    t.float   "height",                           null: false
-    t.integer "count_horizontal",                 null: false
-    t.integer "count_vertical",                   null: false
-    t.float   "padding_top",                      null: false
-    t.float   "padding_left",                     null: false
+    t.string  "page_size",                   default: "A4",  null: false
+    t.boolean "landscape",                   default: false, null: false
+    t.float   "font_size",        limit: 24, default: 11.0,  null: false
+    t.float   "width",            limit: 24,                 null: false
+    t.float   "height",           limit: 24,                 null: false
+    t.integer "count_horizontal",                            null: false
+    t.integer "count_vertical",                              null: false
+    t.float   "padding_top",      limit: 24,                 null: false
+    t.float   "padding_left",     limit: 24,                 null: false
   end
 
   create_table "mailing_lists", force: true do |t|
@@ -282,6 +276,14 @@ ActiveRecord::Schema.define(version: 20140721083911) do
     t.integer "group_id"
     t.string  "group_type"
     t.index ["group_id", "group_type"], :name => "index_people_filters_on_group_id_and_group_type"
+  end
+
+  create_table "people_relations", force: true do |t|
+    t.integer "head_id", null: false
+    t.integer "tail_id", null: false
+    t.string  "kind",    null: false
+    t.index ["head_id"], :name => "index_people_relations_on_head_id"
+    t.index ["tail_id"], :name => "index_people_relations_on_tail_id"
   end
 
   create_table "phone_numbers", force: true do |t|

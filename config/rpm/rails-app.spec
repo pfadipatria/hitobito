@@ -3,7 +3,7 @@
 
 %define app_name     RPM_NAME
 
-%define app_version  1.3
+%define app_version  1.4
 %define ruby_version 1.9.3
 
 ### optional libs
@@ -243,10 +243,13 @@ touch %{wwwdir}/%{name}/www/tmp/restart.txt
 # $1 will be 1 if the package is upgraded
 # and 0 if the package is deinstalled.
 
-# the following old files would be loaded on startup and must 
+# the following old files would be loaded on startup and must
 # be explicitly deleted to load the stop script
 rm -f %{wwwdir}/%{name}/www/app/utils/devise/strategies/one_time_token_authenticatable.rb
 rm -f %{wwwdir}/%{name}/www/app/utils/datetime_attribute.rb
+rm -f %{wwwdir}/%{name}/www/app/domain/event/qualifier/base.rb
+rm -f %{wwwdir}/%{name}/www/app/domain/event/qualifier/leader.rb
+rm -f %{wwwdir}/%{name}/www/app/domain/event/qualifier/participant.rb
 
 %if %{use_delayed_job}
 if [ "$1" = 0 ] ; then
@@ -293,4 +296,3 @@ fi
 
 %changelog
 # write a changelog!
-

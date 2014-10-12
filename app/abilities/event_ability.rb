@@ -12,7 +12,7 @@ class EventAbility < AbilityDsl::Base
   on(Event) do
     permission(:any).may(:read).all
     permission(:any).may(:index_participations).for_event_contacts
-    permission(:any).may(:update).for_leaded_events
+    permission(:any).may(:update).for_managed_events
     permission(:any).may(:qualify).for_qualify_event
 
     permission(:group_full).may(:index_participations, :create, :update, :destroy).in_same_group
@@ -32,11 +32,11 @@ class EventAbility < AbilityDsl::Base
   end
 
   def if_in_course_group
-    in_same_groups(course_offerers)
+    permission_in_groups?(course_offerers)
   end
 
   def if_in_course_layer
-    in_same_layers(course_offerers)
+    permission_in_layers?(course_offerers)
   end
 
   private

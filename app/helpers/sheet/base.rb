@@ -29,6 +29,32 @@ module Sheet
         self.tabs ||= []
         self.tabs << Sheet::Tab.new(label_key, path_method, options)
       end
+
+      def current(view_context)
+        sheet_class = current_sheet_class(view_context)
+        sheet_class.new(view_context)
+      end
+
+      private
+
+      def current_sheet_class(view_context)
+        sheet_for_controller(view_context)
+      end
+
+      def sheet_for_controller(view_context)
+        sheet_class = controller_sheet_class(view_context.controller)
+        if view_context.action_name == 'index' && sheet_class.parent_sheet
+          sheet_class = sheet_class.parent_sheet
+        end
+        sheet_class
+      end
+
+      def controller_sheet_class(controller)
+        sheet_class_name = controller.class.name.gsub(/Controller/, '').singularize
+        "Sheet::#{sheet_class_name}".constantize
+      rescue NameError
+        Sheet::Base
+      end
     end
 
     def initialize(view, child = nil, entry = nil)
@@ -45,7 +71,7 @@ module Sheet
     end
 
     def render_main_tabs
-      unless %w(new edit create update).include?(view.action_name)
+      unless %w(new create).include?(view.action_name)
         render_tabs
       end
     end

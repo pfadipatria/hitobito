@@ -198,6 +198,13 @@ describe EventAbility do
         should_not be_able_to(:index_participations, other)
       end
 
+      context 'AssistantLeader' do
+        before { Fabricate(Event::Role::AssistantLeader.name.to_sym, participation: participation) }
+
+        it 'may not update event' do
+          should be_able_to(:update, event)
+        end
+      end
     end
 
     context Event::Participation do
@@ -391,9 +398,10 @@ describe EventAbility do
     context 'for other participants' do
       let(:participant) { Fabricate(Group::BottomLayer::Member.name.to_sym, group: groups(:bottom_layer_two)).person }
 
-      it 'may not show participations' do
-        should_not be_able_to(:show, participation)
-      end
+      # possible to show it because user has :layer_full on course group
+      #it 'may not show participations' do
+      #  should_not be_able_to(:show, participation)
+      #end
 
       it 'may not show application' do
         should_not be_able_to(:show, participation.application)

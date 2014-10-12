@@ -59,7 +59,7 @@ describe Event::ParticipationsController do
       end
     end
 
-    context 'for other event' do
+    context 'for other event of same group' do
       before { get :show, group_id: group.id, event_id: other_course.id, id: participation.id }
 
       it 'has participation' do
@@ -67,8 +67,64 @@ describe Event::ParticipationsController do
       end
     end
 
+    context 'for other event of other group' do
+
+      let(:group) { groups(:bottom_layer_one)}
+      let(:user) { Fabricate(Group::BottomLayer::Leader.sti_name.to_sym, group: groups(:bottom_layer_one)).person }
+      let(:other_course) do
+        other = Fabricate(:course, groups: [groups(:bottom_layer_two)], kind: course.kind)
+        other.dates << Fabricate(:event_date, event: other, start_at: course.dates.first.start_at)
+        other
+      end
+
+      context 'on prio 2' do
+        let(:participation) do
+          p = Fabricate(:event_participation,
+                        event: other_course,
+                        application: Fabricate(:event_application,
+                                               priority_2: course))
+          p.answers.create!(question_id: course.questions[0].id, answer: 'juhu')
+          p.answers.create!(question_id: course.questions[1].id, answer: 'blabla')
+          p
+        end
+
+        before { get :show, group_id: group.id, event_id: course.id, id: participation.id }
+
+        it 'has participation' do
+          response.status.should eq(200)
+          assigns(:participation).should eq(participation)
+        end
+      end
+
+      context 'on waiting list' do
+        let(:participation) do
+          p = Fabricate(:event_participation,
+                        event: other_course,
+                        application: Fabricate(:event_application,
+                                               waiting_list: true))
+          p
+        end
+
+        before { get :show, group_id: group.id, event_id: course.id, id: participation.id }
+
+        it 'has participation' do
+          response.status.should eq(200)
+          assigns(:participation).should eq(participation)
+        end
+      end
+
+    end
+
   end
 
+  context 'GET print' do
+    render_views
+
+    it 'renders participation as pdf' do
+      get :print, group_id: group.id, event_id: course.id, id: participation.id, format: :pdf
+      response.should be_ok
+    end
+  end
 
   context 'GET new' do
     before { get :new, group_id: group.id, event_id: event.id }
@@ -264,6 +320,31 @@ describe Event::ParticipationsController do
 
   end
 
+  context 'required answers' do
+    let(:event) { events(:top_event) }
+
+    def make_request(person, answer)
+      question = event.questions.create!(question: 'dummy', required: true)
+      sign_in(person)
+
+      post :create, group_id: event.groups.first.id, event_id: event.id, event_participation:
+        { answers_attributes: { '0' => { 'question_id' => question.id, 'answer' => answer } } }
+      assigns(:participation)
+    end
+
+    it 'top_leader can create without supplying required answer' do
+      make_request(people(:top_leader), '').should be_valid
+    end
+
+    it 'bottom_member cannot create without supplying required answer' do
+      make_request(people(:bottom_member), '').should_not be_valid
+    end
+
+    it 'bottom_member can create when supplying required answer' do
+      make_request(people(:bottom_member), 'dummy').should be_valid
+    end
+  end
+
 
   context 'multiple choice answers' do
     let(:event) { events(:top_event) }
@@ -287,7 +368,6 @@ describe Event::ParticipationsController do
 
     context 'PUT #update' do
       let!(:participation) { Fabricate(:event_participation, event: event, person: user) }
-      let(:values) { ['0'] }
       let(:answer) { participation.answers.build }
       let(:answers_attributes) { { '0' => { 'question_id' => question.id, 'answer' => ['0'], id: answer.id } } }
 

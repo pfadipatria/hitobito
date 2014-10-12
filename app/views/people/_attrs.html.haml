@@ -18,6 +18,8 @@
 
         = render_attrs(entry, :created_info, :updated_info)
 
+        = render 'people_relations'
+
       - if entry.additional_information?
         %h2= Person.human_attribute_name(:additional_information)
         = simple_format(entry.additional_information)
@@ -26,7 +28,5 @@
     %aside.span6.offset1
       = render 'roles'
       = render 'event_aside', title: Event::Application.model_name.human(count: 2), collection: @pending_applications
-      = render 'event_aside', title: Event.model_name.human(count: 2), collection: @upcoming_events
+      = render 'event_aside', title: t('.events'), collection: @upcoming_events
       = render 'qualifications', show_buttons: true
-
-

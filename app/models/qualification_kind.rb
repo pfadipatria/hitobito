@@ -6,15 +6,14 @@
 #  https://github.com/hitobito/hitobito.
 
 
-
 # == Schema Information
 #
 # Table name: qualification_kinds
 #
 #  id             :integer          not null, primary key
 #  validity       :integer
-#  created_at     :datetime         not null
-#  updated_at     :datetime         not null
+#  created_at     :datetime
+#  updated_at     :datetime
 #  deleted_at     :datetime
 #  reactivateable :integer
 #
@@ -27,16 +26,9 @@ class QualificationKind < ActiveRecord::Base
 
   has_many :qualifications
 
+  has_many :event_kind_qualification_kinds, class_name: 'Event::KindQualificationKind'
+  has_many :event_kinds, through: :event_kind_qualification_kinds
 
-  has_and_belongs_to_many :event_kinds, join_table: 'event_kinds_qualification_kinds',
-                                        class_name: 'Event::Kind',
-                                        association_foreign_key: :event_kind_id
-  has_and_belongs_to_many :preconditions, join_table: 'event_kinds_preconditions',
-                                          class_name: 'Event::Kind',
-                                          association_foreign_key: :event_kind_id
-  has_and_belongs_to_many :prolongations, join_table: 'event_kinds_prolongations',
-                                          class_name: 'Event::Kind',
-                                          association_foreign_key: :event_kind_id
 
   ### VALIDATES
 
@@ -56,9 +48,9 @@ class QualificationKind < ActiveRecord::Base
   # Soft destroy if events exist, otherwise hard destroy
   def destroy
     if qualifications.exists?
-      super
+      touch_paranoia_column(true)
     else
-      destroy!
+      really_destroy!
     end
   end
 

@@ -4,11 +4,9 @@
 -#  https://github.com/hitobito/hitobito.
 
 = info_field_set_tag do
-  = f.labeled_text_area(:address, rows: 2)
-  = f.labeled(:zip_code, t('.zip_town'), nil, class: 'controls-row') do
-    = f.string_field(:zip_code, class: 'span2')
-    = f.string_field(:town, class: 'span4')
-  = f.labeled_input_field(:country)
+  = render 'contactable/address_fields', f: f
+
+= render_extensions :address_fields, locals: { f: f }
 
 = field_set_tag do
   = render 'email_field', f: f

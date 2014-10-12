@@ -4,8 +4,6 @@
 #  hitobito and licensed under the Affero General Public License version 3
 #  or later. See the COPYING file at the top-level directory or at
 #  https://github.com/hitobito/hitobito.
-
-
 # == Schema Information
 #
 # Table name: groups
@@ -146,14 +144,14 @@ class Group < ActiveRecord::Base
   end
 
   # create alias to call it again
-  alias_method :hard_destroy, :destroy!
-  def destroy!
+  alias_method :hard_destroy, :really_destroy!
+  def really_destroy!
     # run nested_set callback on hard destroy
     destroy_descendants_without_paranoia
     # load events to destroy orphaned later
-    events.to_a
+    list = events.to_a
     hard_destroy
-    destroy_orphaned_events
+    list.each { |e| destroy_orphaned_event(e) }
   end
 
   def decorator_class
@@ -162,15 +160,9 @@ class Group < ActiveRecord::Base
 
   private
 
-  def destroy_orphaned_events
-    events.includes(:groups).each do |e|
-      destroy_orphaned_event(e)
-    end
-  end
-
   def destroy_orphaned_event(event)
     if event.group_ids.blank? || event.group_ids == [id]
-      event.destroy
+      event.destroy!
     end
   end
 

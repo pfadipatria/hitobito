@@ -1,3 +1,9 @@
+# encoding: utf-8
+
+#  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
+#  hitobito and licensed under the Affero General Public License version 3
+#  or later. See the COPYING file at the top-level directory or at
+#  https://github.com/hitobito/hitobito.
 
 desc "Run brakeman"
 task :brakeman do
@@ -44,7 +50,7 @@ namespace :rubocop do
     # do not fail if we find issues
     sh %w(rubocop
           --require rubocop/formatter/checkstyle_formatter
-          --format Rubocop::Formatter::CheckstyleFormatter
+          --format RuboCop::Formatter::CheckstyleFormatter
           --no-color
           --out rubocop-results.xml).join(' ') rescue nil
     true

@@ -64,6 +64,11 @@
   border-color: $purpleDark;
 }
 
+a.btn.disabled,
+a.btn[disabled="disabled"] {
+  pointer-events: none;
+}
+
 .form-horizontal .control-group {
   margin-bottom: 0;
 }
@@ -242,4 +247,8 @@ td.issue, td.revoke {
 .popover {
   max-width: 650px;
   width: 650px;
+}
+.filter_toggle {
+   cursor: pointer;
+   cursor: hand;
 }

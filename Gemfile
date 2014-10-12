@@ -1,10 +1,17 @@
+# encoding: utf-8
+
+#  Copyright (c) 2012-2014, Jungwacht Blauring Schweiz. This file is part of
+#  hitobito and licensed under the Affero General Public License version 3
+#  or later. See the COPYING file at the top-level directory or at
+#  https://github.com/hitobito/hitobito.
+
 source 'https://rubygems.org'
 
-gem 'rails', '4.0.5'
+gem 'rails', '4.1.5'
 
 gem 'activerecord-session_store'
 gem 'airbrake'
-gem 'awesome_nested_set', '>= 3.0.0.rc.3'
+gem 'awesome_nested_set'
 gem 'bcrypt-ruby'
 gem 'cancancan'
 gem 'carrierwave'
@@ -20,12 +27,13 @@ gem 'haml'
 gem 'http_accept_language'
 gem 'magiclabs-userstamp', require: 'userstamp'
 gem 'mini_magick'
-gem 'mysql2'
+gem 'mysql2', '0.3.15' # 0.3.16 fails sphinx specs on jenkins
 gem 'nested_form'
 gem 'oat'
 gem 'paper_trail'
 gem 'paranoia'
 gem 'prawn'
+gem 'prawn-table'
 gem 'protective'
 gem 'rack'
 gem 'rails_config'
@@ -49,33 +57,29 @@ gem 'compass-rails', '>= 1.1.7'
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
 gem 'sass-rails'
-gem 'therubyracer', :platforms => :ruby
+gem 'therubyracer', platforms: :ruby
 gem 'uglifier'
 
 group :development, :test do
   gem 'binding_of_caller'
-  gem 'rspec-rails'
-  gem 'rspec-core'
+  gem 'rspec-rails', '~> 2.14.0'
   gem 'sqlite3'
   gem 'codez-tarantula', require: 'tarantula-rails3'
 end
 
 group :development do
-  gem 'better_errors'
   gem 'bullet'
   gem 'quiet_assets'
 end
 
 group :test do
-  gem 'capybara'
+  gem 'capybara', '~> 2.2.1' # 2.4 didn't work on jenkins (occassional failures)
   gem 'database_cleaner'
   gem 'fabrication'
   gem 'headless'
   gem 'launchy'
-  gem 'poltergeist'
   gem 'rspec-notify-osd'
   gem 'selenium-webdriver'
-  gem 'websocket-driver'
 end
 
 group :console do
@@ -87,24 +91,17 @@ group :console do
   gem 'pry-doc'
   gem 'pry-nav'
   gem 'pry-rails'
-  #gem 'pry-stack_explorer'
+  gem 'pry-remote'
+  gem 'pry-stack_explorer'
   gem 'rdoc-tags'
   gem 'spring-commands-rspec'
   gem 'wirble'
-  gem 'zeus'
-end
-
-group :guard_support do
-  gem 'guard-rspec'
-  gem 'guard-spork'
-  gem 'rb-inotify'
-  gem 'spork', '~> 1.0.0rc3'
 end
 
 group :metrics do
   gem 'annotate'
   gem 'brakeman', '2.5.0'
-  gem 'ci_reporter'
+  gem 'ci_reporter_rspec'
   gem 'rails_code_qa'
   gem 'rails_best_practices'
   gem 'rails-erd'

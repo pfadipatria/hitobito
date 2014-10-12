@@ -8,7 +8,7 @@
 require File.expand_path('../boot', __FILE__)
 require 'benchmark'
 
-b = -> do
+b = lambda do
   require 'rails/all'
   require 'jquery/rails'
 end
@@ -30,7 +30,7 @@ module Hitobito
                                  #{config.root}/app/jobs
                                  #{config.root}/app/serializers
                                  #{config.root}/app/utils
-                               )
+                             )
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -56,13 +56,14 @@ module Hitobito
     Globalize.fallbacks = { de: [:de, :fr, :it, :en],
                             fr: [:fr, :it, :en, :de],
                             it: [:it, :fr, :en, :de],
-                            en: [:en, :de, :fr, :it]}
+                            en: [:en, :de, :fr, :it]
+                          }
 
     # Route errors over the Rails application.
     config.exceptions_app = self.routes
 
     # Configure the default encoding used in templates for Ruby 1.9.
-    config.encoding = "utf-8"
+    config.encoding = 'utf-8'
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
@@ -72,8 +73,8 @@ module Hitobito
 
     config.log_tags = [:uuid]
 
-    config.cache_store = :dalli_store, {compress: true,
-                                        namespace: ENV['RAILS_HOST_NAME'] || 'hitobito'}
+    config.cache_store = :dalli_store, { compress: true,
+                                         namespace: ENV['RAILS_HOST_NAME'] || 'hitobito' }
 
     # Enable the asset pipeline
     config.assets.enabled = true
@@ -81,14 +82,13 @@ module Hitobito
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
 
-    config.assets.precompile += %w(print.css ie.css ie7.css wysiwyg.css wysiwyg.js)
-
+    config.assets.precompile += %w(print.css ie.css ie7.css wysiwyg.css wysiwyg.js
+                                   *.png *.gif *.jpg)
 
     config.generators do |g|
-      g.test_framework      :rspec, fixture: true
-      #g.fixture_replacement :fabrication
+      g.test_framework :rspec, fixture: true
+      # g.fixture_replacement :fabrication
     end
-
 
     config.to_prepare do
       ActionMailer::Base.default from: Settings.email.sender
@@ -108,4 +108,4 @@ module Hitobito
   end
 end
 
-require "prawn/measurement_extensions"
+require 'prawn/measurement_extensions'

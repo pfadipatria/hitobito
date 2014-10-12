@@ -7,6 +7,7 @@ AllCops:
     - bin/**/*
     - spec/**/*
     - vendor/**/*
+    - Guardfile
 
 ClassLength:
   Max: 185  # Try to reduce this value
@@ -20,7 +21,8 @@ CyclomaticComplexity:
 LineLength:
   Max: 115  # Try to reduce this value
 
-
+Encoding:
+  Enabled: true
 
 # Disable all other cops
 
@@ -108,9 +110,6 @@ EmptyLinesAroundBody:
 EmptyLiteral:
   Enabled: false
 
-Encoding:
-  Enabled: false
-
 EndAlignment:
   Enabled: false
 
@@ -154,6 +153,15 @@ LeadingCommentSpace:
   Enabled: false
 
 LineEndConcatenation:
+  Enabled: false
+
+Lint/Eval:
+  Enabled: false
+
+Lint/DefEndAlignment:
+  Enabled: false
+
+Lint/UnusedBlockArgument:
   Enabled: false
 
 Loop:
@@ -222,6 +230,9 @@ SpaceAroundEqualsInParameterDefault:
 SpaceAroundOperators:
   Enabled: false
 
+SpaceBeforeComma:
+  Enabled: false
+
 SpaceInsideBrackets:
   Enabled: false
 
@@ -238,6 +249,33 @@ StringConversionInInterpolation:
   Enabled: false
 
 StringLiterals:
+  Enabled: false
+
+Style/ClassCheck:
+  Enabled: false
+
+Style/CommentIndentation:
+  Enabled: false
+
+Style/EachWithObject:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+Style/IndentArray:
+  Enabled: false
+
+Style/MethodCallParentheses:
+  Enabled: false
+
+Style/Next:
+  Enabled: false
+
+Style/SpaceInsideBlockBraces:
+  Enabled: true
+
+Style/VariableName:
   Enabled: false
 
 Tab:

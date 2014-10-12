@@ -206,24 +206,46 @@
 
 // Left navigation
 .nav-left {
-  position: absolute;
-  width: 160px;
-  background: $grayLighter;
-  border-right: 2px solid $grayLight;
-  @include border-left-radius($borderRadius);
-  padding: 24px 18px 18px 20px;
-
+  .inner {
+    padding: 18px 18px 18px 20px;
+    border-right: 2px solid $grayLight;
+    @include border-left-radius($borderRadius);
+    background: $grayLighter;
+  }
   @include responsive(phone, $mediaTablet) {
-    display: none;
+    display: none !important;
+  }
+}
+#page.with-left-nav {
+  display: table;
+  table-layout: fixed;
+  width: 100%;
+
+  &, &:before, &:after {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  > .nav-left {
+    display: table-cell;
+    width: 160px + 2 * 18px;
+    vertical-align: top;
+  }
+  > .container-fluid {
+    display: table-cell;
+    vertical-align: top;
+  }
+  > .nav-left + .container-fluid {
+    padding-left: 0;
   }
 }
 #page.with-left-nav .container-fluid  {
   @include responsive(mediaTablet) {
-    margin-left: 180px;
-
     > .sheet,
     > .sheet > .container-shadow > #content {
       @include border-top-left-radius(0);
+      @include single-box-shadow(none);
     }
   }
 }
@@ -232,6 +254,7 @@
 .nav-left-list ul {
   list-style: none;
   margin: 0;
+  width: 100%;
 }
 .nav-left-list li {
   line-height: 1.2em;
@@ -260,7 +283,7 @@
   line-height: 20px;
   display: block;
   padding: 6px 20px;
-  margin: 24px -18px 0 -20px;
+  margin: 0px -18px 0 -20px;
 }
 .nav-left-title.active {
   background: $grayLight;
@@ -271,5 +294,7 @@
   font-size: 0.85em;
   color: $gray;
   margin: 20px 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-

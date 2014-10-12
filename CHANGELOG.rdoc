@@ -13,3 +13,10 @@
 * Anzeige von Gruppe und Ebene bei Rollen.
 * JSON API für Gruppen und Personen.
 * Sortierbare Personen und Teilnehmer Listen.
+* Separat definierbare Qualifikationstypen für Kursleiter.
+* Pflichtfelder für Anlass Fragen.
+* Mehrfachauswahl bei Personen Filter und Abo Listen.
+
+== Version 1.4
+
+* Beziehungen zwischen Personen.

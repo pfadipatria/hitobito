@@ -5,12 +5,11 @@
 #
 #  id             :integer          not null, primary key
 #  validity       :integer
-#  created_at     :datetime         not null
-#  updated_at     :datetime         not null
+#  created_at     :datetime
+#  updated_at     :datetime
 #  deleted_at     :datetime
 #  reactivateable :integer
 #
-
 
 #  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
 #  hitobito and licensed under the Affero General Public License version 3
@@ -58,7 +57,7 @@ describe QualificationKind do
   end
 
   it 'does destroy translations on hard destroy' do
-    expect { subject.destroy! }.to change { QualificationKind::Translation.count }.by(-1)
+    expect { subject.really_destroy! }.to change { QualificationKind::Translation.count }.by(-1)
   end
 
 end

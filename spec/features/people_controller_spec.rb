@@ -74,12 +74,74 @@ describe PeopleController, js: true do
           find('#role_group_id_chosen ul.chosen-results').find('li', text: 'Group 111').click
 
           click_button 'Speichern'
+          sleep 0.2
           page.should have_selector('.popover .alert-error', text: 'Rolle muss ausgefüllt werden')
 
           find('#role_type_select a.chosen-single').click
           find('#role_type_select ul.chosen-results').find('li', text: 'Leader').click
           click_button 'Speichern'
           cell.should have_text 'Group 111'
+        end
+      end
+    end
+  end
+
+
+  context 'people relations' do
+    let(:user) { people(:top_leader) }
+
+    it 'is not disabled if no kinds are set' do
+      sign_in(user)
+      visit edit_group_person_path(group_id: groups(:top_group), id: user.id)
+
+      should_not have_content 'Beziehungen'
+    end
+
+    context 'with kinds' do
+
+      before do
+        PeopleRelation.kind_opposites['sibling'] = 'sibling'
+
+        sign_in(user)
+      end
+
+      after do
+        PeopleRelation.kind_opposites.clear
+      end
+
+      it 'can define a new relation' do
+        obsolete_node_safe do
+          visit edit_group_person_path(group_id: groups(:top_group), id: user.id)
+          should have_content 'Beziehungen'
+
+          find('a[data-association="relations_to_tails"]', text: 'Eintrag hinzufügen').click
+          find('#relations_to_tails_fields input[data-provide=entity]').set('Bottom')
+          find('#relations_to_tails_fields ul.typeahead li').click
+
+          all('button', text: 'Speichern').first.click
+          page.should have_content('erfolgreich aktualisiert')
+
+          relations = Person.find(user.id).relations_to_tails
+          relations.should have(1).item
+          relations.first.opposite.tail_id.should eq(user.id)
+        end
+      end
+
+      it 'remove existing relation' do
+        obsolete_node_safe do
+          user.relations_to_tails.create!(tail_id: people(:bottom_member).id, kind: 'sibling')
+
+          visit edit_group_person_path(group_id: groups(:top_group), id: user.id)
+          should have_content 'Beziehungen'
+
+          find('#relations_to_tails_fields input[data-provide=entity]').set(' ')
+
+          all('button', text: 'Speichern').first.click
+          page.should have_content('erfolgreich aktualisiert')
+
+          relations = Person.find(user.id).relations_to_tails
+          relations.should have(0).item
+          PeopleRelation.count.should eq(0)
         end
       end
     end

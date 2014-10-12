@@ -8,28 +8,29 @@
 #
 # Table name: events
 #
-#  id                     :integer          not null, primary key
-#  type                   :string(255)
-#  name                   :string(255)      not null
-#  number                 :string(255)
-#  motto                  :string(255)
-#  cost                   :string(255)
-#  maximum_participants   :integer
-#  contact_id             :integer
-#  description            :text
-#  location               :text
-#  application_opening_at :date
-#  application_closing_at :date
-#  application_conditions :text
-#  kind_id                :integer
-#  state                  :string(60)
-#  priorization           :boolean          default(FALSE), not null
-#  requires_approval      :boolean          default(FALSE), not null
-#  created_at             :datetime
-#  updated_at             :datetime
-#  participant_count      :integer          default(0)
-#  application_contact_id :integer
-#  external_applications  :boolean          default(FALSE)
+#  id                               :integer          not null, primary key
+#  type                             :string(255)
+#  name                             :string(255)      not null
+#  number                           :string(255)
+#  motto                            :string(255)
+#  cost                             :string(255)
+#  maximum_participants             :integer
+#  contact_id                       :integer
+#  description                      :text
+#  location                         :text
+#  application_opening_at           :date
+#  application_closing_at           :date
+#  application_conditions           :text
+#  kind_id                          :integer
+#  state                            :string(60)
+#  priorization                     :boolean          default(FALSE), not null
+#  requires_approval                :boolean          default(FALSE), not null
+#  created_at                       :datetime
+#  updated_at                       :datetime
+#  participant_count                :integer          default(0)
+#  application_contact_id           :integer
+#  external_applications            :boolean          default(FALSE)
+#  representative_participant_count :integer          default(0)
 #
 
 require 'spec_helper'
@@ -391,6 +392,80 @@ describe Event do
       event.participation_role_labels.count.should eq 0
     end
 
+  end
+
+  context 'participant and application counts' do
+    let(:event) { events(:top_event) }
+    let(:another_event) { Event::Course.create!(name: 'Another', group_ids: event.group_ids,
+                                                dates: event.dates, kind: event_kinds(:slk)) }
+
+    def create_participation(prio, attrs = { active: true })
+      participation_attrs = prio == :prio1 ? { event: event } : { event: another_event }
+      application_attrs = prio == :prio1 ? { priority_1: event } : { priority_1: another_event, priority_2: event }
+
+      participation = Fabricate(:event_participation, participation_attrs.merge(attrs))
+      participation.create_application!(application_attrs)
+      participation.save!
+
+      Event::ParticipantAssigner.new(event, participation).create_role if attrs[:active]
+    end
+
+    def assert_counts(attrs)
+      event.refresh_participant_count!
+      event.refresh_representative_participant_count!
+      event.reload
+
+      [:participant, :representative_participant].each do |attr|
+        event.send(:"#{attr}_count").should eq attrs[attr]
+      end
+    end
+
+    it 'should be zero if no participations/applications available' do
+      event.participations.count.should eq 0
+      Event::Application.where('priority_2_id = ? OR priority_3_id = ?', event.id, event.id).
+        count.should eq 0
+
+      assert_counts(participant: 0, representative_participant: 0)
+    end
+
+    it 'should not count leaders' do
+      leader = Fabricate(:event_participation, event: event, active: true)
+      Fabricate(Event::Role::Leader.name.to_sym, participation: leader, label: 'Foolabel')
+
+      assert_counts(participant: 0, representative_participant: 0)
+    end
+
+    it 'should count active prio 1 participations correctly' do
+      create_participation(:prio1)
+      assert_counts(participant: 1, representative_participant: 1)
+    end
+
+    it 'should count active prio 2 participations correctly' do
+      create_participation(:prio2)
+      assert_counts(participant: 1, representative_participant: 1)
+    end
+
+    it 'should count pending prio 1 participations correctly' do
+      create_participation(:prio1, active: false)
+      assert_counts(participant: 0, representative_participant: 1)
+    end
+
+    it 'should count pending prio 2 participations correctly' do
+      create_participation(:prio2, active: false)
+      assert_counts(participant: 0, representative_participant: 0)
+    end
+
+    it 'should sum participations/applications correctly' do
+      leader = Fabricate(:event_participation, event: event, active: true)
+      Fabricate(Event::Role::Leader.name.to_sym, participation: leader, label: 'Foolabel')
+
+      create_participation(:prio1)
+      create_participation(:prio2)
+      create_participation(:prio1, active: false)
+      create_participation(:prio2, active: false)
+
+      assert_counts(participant: 2, representative_participant: 3)
+    end
   end
 
   context 'destroyed associations' do

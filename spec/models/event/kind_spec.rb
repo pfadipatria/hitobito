@@ -1,4 +1,15 @@
 # encoding: utf-8
+# == Schema Information
+#
+# Table name: event_kinds
+#
+#  id          :integer          not null, primary key
+#  created_at  :datetime
+#  updated_at  :datetime
+#  deleted_at  :datetime
+#  minimum_age :integer
+#
+
 
 #  Copyright (c) 2012-2014, Pfadibewegung Schweiz. This file is part of
 #  hitobito and licensed under the Affero General Public License version 3
@@ -16,7 +27,7 @@ describe Event::Kind do
   end
 
   it 'does destroy translations on hard destroy' do
-    expect { slk.destroy! }.to change { Event::Kind::Translation.count }.by(-1)
+    expect { slk.really_destroy! }.to change { Event::Kind::Translation.count }.by(-1)
   end
 
 end

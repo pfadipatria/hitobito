@@ -16,8 +16,8 @@
 #
 #= require jquery
 #= require jquery_ujs
-#= require jquery.ui.datepicker
-#= require jquery.ui.effect-highlight
+#= require jquery-ui/datepicker
+#= require jquery-ui/effect-highlight
 #= require bootstrap-alert
 #= require bootstrap-button
 #= require bootstrap-dropdown
@@ -87,6 +87,15 @@ closePopover = (event) ->
   event.preventDefault()
   $($('body').data('popover')).popover('destroy')
 
+toggleFilterRoles = (event) ->
+  target = $(event.target)
+
+  boxes = target.nextUntil('.filter-toggle').find(':checkbox')
+  checked = boxes.filter(':checked').length == boxes.length
+
+  boxes.each((el) -> $(this).prop('checked', !checked))
+  target.data('checked', !checked)
+
 Application.moveElementToBottom = (elementId, targetId, callback) ->
   $target = $('#' + targetId)
   left = $target.offset().left
@@ -105,6 +114,14 @@ Application.activateChosen = (i, element) ->
   text = element.data('chosen-no-results') || 'Keine Einträge gefunden mit'
   element.chosen(no_results_text: text,
                  search_contains: true)
+
+
+Application.updateApplicationMarketCount = ->
+  applications = $('tbody#applications tr').size()
+  selector = if applications == 1 then 'one' else 'other'
+  text = "#{applications} "
+  text += $(".pending_applications_info .#{selector}").text()
+  $('.pending_applications_info span:eq(0)').html(text)
 
 
 $ ->
@@ -130,7 +147,9 @@ $ ->
 
   # set insertFields function for nested-form gem
   window.nestedFormEvents.insertFields = (content, assoc, link) ->
-    $(link).closest('form').find("##{assoc}_fields").append($(content))
+    el = $(link).closest('form').find("##{assoc}_fields")
+    el.append($(content))
+      .find('[data-provide=entity]').each(Application.setupEntityTypeahead)
 
   # show alert if ajax requests fail
   $(document).on('ajax:error', (event, xhr, status, error) ->
@@ -151,4 +170,6 @@ $ ->
   $('body').on('click', 'a[data-swap="person-fields"]', resetRolePersonId)
 
   $('body').on('click', '.popover a.cancel', closePopover)
+
+  $('body').on('click', '.filter-toggle', toggleFilterRoles)
 

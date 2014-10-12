@@ -45,6 +45,7 @@
 #  profession             :string(255)
 #  authentication_token   :string
 #
+
 class Person < ActiveRecord::Base
 
   PUBLIC_ATTRS = [:id, :first_name, :last_name, :nickname, :company_name, :company,
@@ -99,10 +100,14 @@ class Person < ActiveRecord::Base
 
   has_many :subscriptions, as: :subscriber, dependent: :destroy
 
+  has_many :relations_to_tails, class_name: 'PeopleRelation',
+                                dependent: :destroy,
+                                foreign_key: :head_id
 
   belongs_to :primary_group, class_name: 'Group'
   belongs_to :last_label_format, class_name: 'LabelFormat'
 
+  accepts_nested_attributes_for :relations_to_tails, allow_destroy: true
 
   ### VALIDATIONS
 
@@ -118,6 +123,7 @@ class Person < ActiveRecord::Base
 
   ### CALLBACKS
   before_validation :override_blank_email
+  before_validation :remove_blank_relations
   before_destroy :destroy_roles
 
 
@@ -161,7 +167,7 @@ class Person < ActiveRecord::Base
   end
 
 
-  ### INSTANCE METHODS
+  ### ATTRIBUTE INSTANCE METHODS
 
   def to_s(format = :default)
     if company?
@@ -197,6 +203,20 @@ class Person < ActiveRecord::Base
     gender == 'w'
   end
 
+  def default_group_id
+    primary_group_id || groups.first.try(:id) || Group.root.id
+  end
+
+  def years
+    if birthday?
+      now = Time.zone.now.to_date
+      extra = now.month > birthday.month || (now.month == birthday.month && now.day >= birthday.day)
+      now.year - birthday.year - (extra ? 0 : 1)
+    end
+  end
+
+  ### ASSOCIATIONS INSTANCE METHODS
+
   def upcoming_events
     events.upcoming.merge(Event::Participation.active).uniq
   end
@@ -207,7 +227,7 @@ class Person < ActiveRecord::Base
 
   def latest_qualifications_uniq_by_kind
     qualifications.
-      includes(:person, :qualification_kind).
+      includes(:person, qualification_kind: :translations).
       order_by_date.
       group_by(&:qualification_kind).values.map(&:first)
   end
@@ -220,9 +240,7 @@ class Person < ActiveRecord::Base
          order('groups.name', 'roles.deleted_at')
   end
 
-  def default_group_id
-    primary_group_id || groups.first.try(:id) || Group.root.id
-  end
+  ### AUTHENTICATION INSTANCE METHODS
 
   # Is this person allowed to login?
   def login?
@@ -247,18 +265,19 @@ class Person < ActiveRecord::Base
     false
   end
 
-  def years
-    if birthday?
-      now = Time.zone.now.to_date
-      extra = now.month > birthday.month || (now.month == birthday.month && now.day >= birthday.day)
-      now.year - birthday.year - (extra ? 0 : 1)
-    end
-  end
 
   private
 
   def override_blank_email
     self.email = nil if email.blank?
+  end
+
+  def remove_blank_relations
+    relations_to_tails.each do |e|
+      unless e.frozen?
+        e.mark_for_destruction if e.tail_id.blank?
+      end
+    end
   end
 
   def assert_has_any_name
