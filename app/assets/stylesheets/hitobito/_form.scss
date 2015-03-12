@@ -188,6 +188,16 @@ label.radio {
 .controls div.inline,
 .controls p.inline {
   padding-top: 5px;
+  display: inline-block;
+}
+
+.controls .help-inline {
+  margin-left: 10px;
+  padding-bottom: 8px;
+}
+
+.controls .inline + .help-inline {
+  padding-bottom: 0;
 }
 
 textarea {
@@ -199,15 +209,17 @@ textarea {
   border-top-color: $grayLight;
 }
 
-.fields .controls-row {
-  border-bottom: 1px solid $grayLight;
-  margin-bottom: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
+.control-group .fields {
+  .controls-row {
+    border-bottom: 1px solid $grayLight;
+    margin-bottom: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
 
-.fields .help-inline {
-  float: right;
+  .help-inline {
+    float: right;
+  }
 }
 
 .form-horizontal .controls .help-block {

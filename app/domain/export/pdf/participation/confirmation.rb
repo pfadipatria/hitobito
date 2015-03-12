@@ -10,7 +10,7 @@ module Export::Pdf::Participation
 
     def render
       first_page_section do
-        render_heading
+        render_read_and_agreed
         render_contact_address if contact
       end
     end
@@ -25,19 +25,20 @@ module Export::Pdf::Participation
       application && application.contact
     end
 
-    def render_heading
-      text t(".read_and_agreed_for_#{i18n_event_postfix}"), style: :bold
+    def render_read_and_agreed
+      text I18n.t("event.participations.print.read_and_agreed_for_#{i18n_event_postfix}"), style: :bold
       move_down_line
     end
 
     def render_contact_address
-      text t('event.applied_to'), style: :bold
+      text I18n.t('event.applied_to'), style: :bold
 
       pdf.bounding_box([10, cursor], width: bounds.width) do
-        text t('contactable.address_or_email',
+        text I18n.t('contactable.address_or_email',
                address: [contact.to_s, contact.address, contact.zip_code, contact.town].join(', '),
                email: contact.email)
       end
+      move_down_line
     end
 
   end

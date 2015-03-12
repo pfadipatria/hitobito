@@ -80,7 +80,7 @@ module MailRelay
       destinations = receivers
       if destinations.present?
         # set destinations
-        message.smtp_envelope_to = destinations
+        message.smtp_envelope_to = IdnSanitizer.sanitize(destinations)
 
         # Set sender to actual server to satisfy SPF:
         # http://www.openspf.org/Best_Practices/Webgenerated

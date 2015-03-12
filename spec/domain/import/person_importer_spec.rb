@@ -11,7 +11,7 @@ describe Import::PersonImporter do
 
   let(:group) { groups(:top_group) }
   let(:role_type) { Group::TopGroup::Leader }
-  let(:importer)  { Import::PersonImporter.new(group: group, role_type: role_type, data: data)  }
+  let(:importer)  { Import::PersonImporter.new(data, group, role_type)  }
   subject { importer }
 
   context 'minimal' do
@@ -107,17 +107,21 @@ describe Import::PersonImporter do
       before { Fabricate(:person, attrs.merge(email: 'asdf@asdf.net')); importer.import }
       subject { importer }
       its(:errors) { should eq ['Zeile 1: 2 Treffer in Duplikatserkennung.'] }
+      it 'does not change person' do
+        person.reload.roles.size.should eq 0
+      end
     end
 
     context 'person loaded multiple times via doublette finder' do
       let(:attrs) { { email: 'foo@bar.net', nickname: '', last_name: '' } }
-      let(:data) do [{ email: 'foo@bar.net', nickname: 'nickname', social_account_msn: 'msn' },
-                     { email: 'foo@bar.net', last_name: 'last_name', social_account_skype: 'skype' }] end
+      let(:data) do [{ email: 'foo@bar.net', nickname: 'nickname', town: 'Bern', social_account_msn: 'msn' },
+                     { email: 'foo@bar.net', last_name: 'last_name', town: 'Muri', social_account_skype: 'skype' }] end
 
       before { importer.import }
       its('roles.size') { should eq 1 }
       its(:nickname) { should eq 'nickname' }
       its(:last_name) { should eq 'last_name' }
+      its(:town) { should eq 'Bern' }
       its('social_accounts.size') { should eq 2 }
     end
   end
@@ -126,20 +130,23 @@ describe Import::PersonImporter do
     let(:parser) { Import::CsvParser.new(File.read(path(:list))) }
     let(:mapping) { headers_mapping(parser) }
     let(:data) { parser.map_data(mapping) }
+    let(:imported) { Person.order(:id).last }
+
     before { parser.parse }
 
     context 'importer reports errors' do
       before { importer.import }
       subject { importer }
 
-      its(:errors) { should include 'Zeile 1: Firma muss ausgefüllt werden' }
-      its(:errors) { should include 'Zeile 2: Firma muss ausgefüllt werden, PLZ ist keine Zahl' }
+      its(:errors) { should include 'Zeile 1: Firmenname muss ausgefüllt werden' }
+      its(:errors) { should include 'Zeile 2: Firmenname muss ausgefüllt werden, PLZ ist keine Zahl' }
       its(:errors) { should include 'Zeile 4: PLZ ist keine Zahl' }
+      its(:errors) { should have(3).items }
     end
 
     context 'imported person' do
-      before { importer.import }
-      subject { Person.last }
+      before { expect { importer.import }.to change { Person.count }.by(1) }
+      subject { imported }
 
       its(:first_name) { should eq 'Ramiro' }
       its(:last_name) { should eq 'Brown' }
@@ -154,7 +161,7 @@ describe Import::PersonImporter do
       its(:additional_information) { should be_present }
 
       context 'phone numbers' do
-        subject { Person.last.phone_numbers }
+        subject { imported.phone_numbers }
         its(:size) { should eq 4 }
         its('first.label') { should eq 'Privat' }
         its('first.number') { should eq '1-637-999-2837 x7851' }
@@ -170,7 +177,7 @@ describe Import::PersonImporter do
       end
 
       context 'social accounts' do
-        subject { Person.last.social_accounts.order(:label) }
+        subject { imported.social_accounts.order(:label) }
         its(:size) { should eq 3 }
         its('first.label') { should eq 'MSN' }
         its('first.name') { should eq 'reyes_mckenzie' }
@@ -183,6 +190,5 @@ describe Import::PersonImporter do
       end
     end
   end
-
 
 end

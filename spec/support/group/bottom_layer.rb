@@ -17,13 +17,17 @@ class Group::BottomLayer < Group
 
 
   class Leader < ::Role
-    self.permissions = [:layer_full, :contact_data, :approve_applications]
+    self.permissions = [:layer_and_below_full, :contact_data, :approve_applications]
+  end
+
+  class LocalGuide < ::Role
+    self.permissions = [:layer_full]
   end
 
   class Member < ::Role
-    self.permissions = [:layer_read]
+    self.permissions = [:layer_and_below_read]
   end
 
-  roles Leader, Member
+  roles Leader, LocalGuide, Member
 
 end

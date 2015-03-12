@@ -20,7 +20,7 @@ module FilterNavigation
       @deep = deep
       init_kind_filter_names
       init_labels
-      init_items
+      init_kind_items
       init_dropdown_links
     end
 
@@ -45,16 +45,13 @@ module FilterNavigation
       end
     end
 
-    def init_items
-      item(main_filter_name, filter_path)
-      init_kind_items
-    end
-
     def init_kind_items
-      @kind_filter_names.to_a[1..-1].each do |kind, name|
+      @kind_filter_names.each do |kind, name|
         types = group.role_types.select { |t| t.kind == kind }
         if visible_role_types?(types)
-          item(name, fixed_types_path(name, types))
+          count = group.people.where(roles: { type: types.collect(&:sti_name) }).uniq.count
+          path = kind == :member ? path : fixed_types_path(name, types)
+          item(name, path, count)
         end
       end
     end
@@ -82,13 +79,13 @@ module FilterNavigation
     def add_entire_layer_filter_link
       name = translate(:entire_layer)
       link = fixed_types_path(name, sub_groups_role_types, kind: 'layer')
-      dropdown.item(name, link)
+      dropdown.add_item(name, link)
     end
 
     def add_entire_subgroup_filter_link
       name = translate(:entire_group)
       link = fixed_types_path(name, sub_groups_role_types, kind: 'deep')
-      dropdown.item(name, link)
+      dropdown.add_item(name, link)
     end
 
     def add_custom_people_filter_links
@@ -101,34 +98,36 @@ module FilterNavigation
         link = template.new_group_people_filter_path(
                 group.id,
                 people_filter: { role_type_ids: role_type_ids })
-        dropdown.divider if dropdown.items.present?
-        dropdown.item(translate(:new_filter), link)
+        dropdown.add_divider if dropdown.items.present?
+        dropdown.add_item(translate(:new_filter), link)
       end
     end
 
     def people_filter_link(filter)
-      link = filter_path(filter, kind: 'deep')
-
+      item = dropdown.add_item(filter.name, filter_path(filter, kind: 'deep'))
       if can?(:destroy, filter)
-        sub_item = [template.icon(:trash),
-                    template.group_people_filter_path(group, filter),
-                    data: { confirm: template.ti(:confirm_delete),
-                            method:  :delete }]
-        dropdown.item(filter.name, link, sub_item)
-      else
-        dropdown.item(filter.name, link)
+        item.sub_items << delete_filter_item(filter)
       end
+    end
+
+    def delete_filter_item(filter)
+      ::Dropdown::Item.new(template.icon(:trash),
+                           template.group_people_filter_path(group, filter),
+                           data: { confirm: template.ti(:confirm_delete),
+                                   method:  :delete })
     end
 
     def fixed_types_path(name, types, options = {})
       filter_path(PeopleFilter.new(role_type_ids: types.collect(&:id), name: name), options)
     end
 
-    def filter_path(filter = nil, options = {})
-      if filter
-        options[:role_type_ids] ||= filter.role_type_ids_string
-        options[:name] ||= filter.name
-      end
+    def filter_path(filter, options = {})
+      options[:role_type_ids] ||= filter.role_type_ids_string
+      options[:name] ||= filter.name
+      path(options)
+    end
+
+    def path(options = {})
       template.group_people_path(group, options)
     end
 

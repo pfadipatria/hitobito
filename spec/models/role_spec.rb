@@ -25,14 +25,14 @@ describe Role do
   context 'class' do
     subject { Role }
 
-    its(:all_types) { should have(10).items }
+    its(:all_types) { should have(13).items }
 
-    its(:visible_types) { should have(8).items }
+    its(:visible_types) { should have(11).items }
 
     its(:visible_types) { should_not include(Group::BottomGroup::Member) }
 
-    it 'should have two types with permission :layer_full' do
-      Role.types_with_permission(:layer_full).to_set.should == [Group::TopGroup::Leader, Group::BottomLayer::Leader].to_set
+    it 'should have two types with permission :layer_and_below_full' do
+      Role.types_with_permission(:layer_and_below_full).to_set.should == [Group::TopGroup::Leader, Group::BottomLayer::Leader].to_set
     end
 
     it 'should have no types with permission :not_existing' do

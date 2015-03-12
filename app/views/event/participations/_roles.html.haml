@@ -3,8 +3,13 @@
 -#  or later. See the COPYING file at the top-level directory or at
 -#  https://github.com/hitobito/hitobito.
 
-= section_table(Role.model_name.human(count: 2), entry.roles) do |role|
+= section_table(Role.model_name.human(count: 2), entry.roles.includes(:participation)) do |role|
+
   %td
     %strong= role.to_s
-  %td= link_action_edit(edit_group_event_role_path(@group, @event, role)) if can?(:edit, role)
-  %td= link_action_destroy(group_event_role_path(@group, @event, role)) if !role.restricted? && can?(:destroy, role)
+  %td
+    - if can?(:edit, role)
+      = link_action_edit(edit_group_event_role_path(@group, @event, role))
+  %td
+    - if !role.restricted? && can?(:destroy, role)
+      = link_action_destroy(group_event_role_path(@group, @event, role))

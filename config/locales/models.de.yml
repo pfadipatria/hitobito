@@ -54,6 +54,10 @@ de:
           attributes:
             choices:
               requires_more_than_one_choice: 'muss mindestens zwei Anworten enthalten.'
+        event/participation:
+          attributes:
+            person_id:
+              taken: ist bereits angemeldet.
         mailing_list:
           attributes:
             mail_name:
@@ -177,7 +181,7 @@ de:
         genders:
           m: männlich
           w: weiblich
-          default: unbekannt
+          _nil: unbekannt
         birthday: Geburtstag
         additional_information: Zusätzliche Angaben
         remember_me: Angemeldet bleiben
@@ -230,6 +234,9 @@ de:
         booking_info: Anmeldungen
         questions: Fragen
         kind_id: Art
+        teamer_count: Anzahl Leitungsteam
+        participant_count: Anzahl Teilnehmende
+        applicant_count: Anzahl Anmeldungen
 
       event/course:
         kind_id: Kursart
@@ -242,14 +249,16 @@ de:
       event/role:
         label: Bezeichnung
         person: Person
+        type: Rolle
         participation: Person
 
       event/participation:
-        person_id: '' # Empty to get a nice message for uniqueness validation
+        person_id: Person
         event_id: Event
         additional_information: Bemerkungen (Allgemeines, Gesundheitsinformationen, Allergien, usw.)
         answers: Fragen
         created_at: Anmeldedatum
+        roles: Rolle
 
       event/application:
         priority_1_id: "Kurs"
@@ -346,8 +355,10 @@ de:
           permission:
             description:
               admin: Administration von applikationsweiten Einstellungen wie Kursarten oder Etikettenformate.
-              layer_full: Alles Lesen und Schreiben auf dieser Ebene und allen darunter liegenden Ebenen. Erstellen von Anlässen und Abos auf dieser Ebene.
-              layer_read: Alles Lesen auf dieser Ebene und allen darunter liegenden Ebenen.
+              layer_and_below_full: Alles Lesen und Schreiben auf dieser Ebene und allen darunter liegenden Ebenen. Erstellen von Anlässen und Abos auf dieser Ebene.
+              layer_and_below_read: Alles Lesen auf dieser Ebene und allen darunter liegenden Ebenen.
+              layer_full: Alles Lesen und Schreiben auf dieser Ebene. Erstellen von Anlässen und Abos auf dieser Ebene.
+              layer_read: Alles Lesen auf dieser Ebene.
               group_full: Lesen und Schreiben auf der Gruppe. Erstellen von Anlässen und Abos auf der Gruppe.
               group_read: Lesen auf der Gruppe.
               contact_data: Lesen der Kontaktdaten aller anderen Personen mit Kontaktdatenberechtigung.

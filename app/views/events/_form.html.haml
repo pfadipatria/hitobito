@@ -14,7 +14,12 @@
       = f.labeled_input_field(:kind_id)
 
     - entry.used?(:state) do
-      = f.labeled_belongs_to_field(:state, list: entry.state_collection) if entry.possible_states.present?
+      - if entry.possible_states.present?
+        = f.labeled_belongs_to_field(:state, list: entry.state_collection)
+      - else
+        = f.labeled_input_field(:state)
+
+    = render_extensions :main_fields, locals: { f: f }
 
     = f.labeled_input_fields(*entry.used_attributes(:number, :description, :motto, :cost, :location))
 
@@ -23,12 +28,13 @@
     = render_extensions 'fields', locals: { f: f }
 
   - if @groups.present?
-    = field_set_tag t('event.run_by') do
-      = f.labeled(:group_ids, '&nbsp;'.html_safe) do
-        = hidden_field_tag('event[group_ids][]', @group.id)
-        = f.inline_check_box(:group_ids, @group.id, @group.to_s, disabled: true)
-        - @groups.each do |group|
-          = f.inline_check_box(:group_ids, group.id, group.to_s)
+    - entry.used?(:group_ids) do
+      = field_set_tag t('event.run_by') do
+        = f.labeled(:group_ids, '&nbsp;'.html_safe) do
+          = hidden_field_tag('event[group_ids][]', @group.id)
+          = f.inline_check_box(:group_ids, @group.id, @group.to_s, disabled: true)
+          - @groups.each do |group|
+            = f.inline_check_box(:group_ids, group.id, group.to_s)
 
 
   = field_set_tag Event.human_attribute_name(:dates) do

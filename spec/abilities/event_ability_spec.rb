@@ -19,7 +19,7 @@ describe EventAbility do
 
   subject { Ability.new(user.reload) }
 
-  context :layer_full do
+  context :layer_and_below_full do
     let(:role) { Fabricate(Group::TopGroup::Leader.name.to_sym, group: groups(:top_group)) }
 
     context Event do
@@ -47,6 +47,25 @@ describe EventAbility do
       it 'may index people for event in lower layer' do
         other = Fabricate(:event, groups: [groups(:bottom_layer_one)])
         should be_able_to(:index_participations, other)
+      end
+
+      it 'may list all courses' do
+        should be_able_to(:list_all, Event::Course)
+      end
+
+      it 'may export course list' do
+        should be_able_to(:export_list, Event::Course)
+      end
+
+      it 'may not list all courses if not in course layer' do
+        Group::TopLayer.event_types.delete(Event::Course)
+        Group.root_types(Group::TopLayer)
+        begin
+          should_not be_able_to(:list_all, Event::Course)
+        ensure
+          Group::TopLayer.event_types << Event::Course
+          Group.root_types(Group::TopLayer)
+        end
       end
 
       context 'in other layer' do
@@ -106,6 +125,80 @@ describe EventAbility do
 
   end
 
+
+  context :layer_full do
+    let(:role) { Fabricate(Group::TopGroup::LocalGuide.name.to_sym, group: groups(:top_group)) }
+
+    context Event do
+      it 'may create event in his group' do
+        should be_able_to(:create, group.events.new.tap { |e| e.groups << group })
+      end
+
+      it 'may create event in his layer' do
+        should be_able_to(:create, groups(:toppers).events.new.tap { |e| e.groups << group })
+      end
+
+      it 'may update event in his layer' do
+        should be_able_to(:update, event)
+      end
+
+      it 'may index people for event in his layer' do
+        should be_able_to(:index_participations, event)
+      end
+
+      it 'may not update event in lower layer' do
+        other = Fabricate(:event, groups: [groups(:bottom_layer_one)])
+        should_not be_able_to(:update, other)
+      end
+
+      it 'may not index people for event in lower layer' do
+        other = Fabricate(:event, groups: [groups(:bottom_layer_one)])
+        should_not be_able_to(:index_participations, other)
+      end
+
+      it 'may list all courses' do
+        should be_able_to(:list_all, Event::Course)
+      end
+
+      it 'may not export course list' do
+        should_not be_able_to(:export_list, Event::Course)
+      end
+    end
+
+    context Event::Participation do
+      before { Fabricate(Event::Role::Participant.name.to_sym, participation: participation) }
+
+      it 'may show participation' do
+        should be_able_to(:show, participation)
+      end
+
+      it 'may create participation' do
+        should be_able_to(:create, participation)
+      end
+
+      it 'may update participation' do
+        should be_able_to(:update, participation)
+      end
+
+      it 'may destroy participation' do
+        should be_able_to(:destroy, participation)
+      end
+
+      it 'may not show participation in event from lower layer' do
+        other = Fabricate(:event_participation, event: Fabricate(:event, groups: [groups(:bottom_group_one_two)]))
+        should_not be_able_to(:show, other)
+      end
+
+      it 'may still create when application is not possible' do
+        event.stub(application_possible?: false)
+        should be_able_to(:create, participation)
+      end
+
+    end
+
+  end
+
+
   context :group_full do
     let(:role) { Fabricate(Group::BottomGroup::Leader.name.to_sym, group: groups(:bottom_group_one_one)) }
 
@@ -134,6 +227,10 @@ describe EventAbility do
       it 'may not index people for event in other group' do
         other = Fabricate(:event, groups: [groups(:bottom_group_one_two)])
         should_not be_able_to(:index_participations, other)
+      end
+
+      it 'may not list all courses' do
+        should_not be_able_to(:list_all, Event::Course)
       end
     end
 
@@ -168,8 +265,9 @@ describe EventAbility do
     let(:group)  { groups(:bottom_layer_one) }
     let(:role)   { Fabricate(Group::BottomLayer::Member.name.to_sym, group: groups(:bottom_layer_one)) }
     let(:participation) { Fabricate(:event_participation, event: event, person: user) }
+    let(:event_role) { Fabricate(Event::Role::Leader.name.to_sym, participation: participation) }
 
-    before { Fabricate(Event::Role::Leader.name.to_sym, participation: participation) }
+    before { event_role }
 
     context Event do
       it 'may not create events' do
@@ -238,9 +336,44 @@ describe EventAbility do
       end
     end
 
+    context Event::Role do
+      let(:other) { Fabricate(:event_participation, event: event) }
+      let(:other_role) { Fabricate(Event::Role::Leader.name.to_sym, participation: other) }
+      before { other_role }
+
+      it 'may update own role' do
+        should be_able_to(:update, event_role)
+      end
+
+      it 'may update other role' do
+        should be_able_to(:update, other_role)
+      end
+
+      it 'may not destroy own leader role' do
+        should_not be_able_to(:destroy, event_role)
+      end
+
+      it 'may destroy own helper role' do
+        helper = Fabricate(Event::Role::Speaker.name.to_sym,
+                          participation: participation)
+        should be_able_to(:destroy, helper)
+      end
+
+      it 'may destroy other role' do
+        should be_able_to(:destroy, other_role)
+      end
+
+      it 'may not update role in other event' do
+        other = Fabricate(Event::Role::Participant.name.to_sym,
+                          participation: Fabricate(:event_participation,
+                                                   event: Fabricate(:event, groups: [group])))
+        should_not be_able_to(:update, other)
+      end
+    end
+
   end
 
-  context :event_contact_data do
+  context :participations_read do
     let(:role)   { Fabricate(Group::BottomGroup::Leader.name.to_sym, group: groups(:bottom_group_one_one)) }
     let(:event)  { Fabricate(:event, groups: [groups(:bottom_layer_one)]) }
     let(:participation) { Fabricate(:event_participation, event: event, person: user) }
@@ -398,7 +531,7 @@ describe EventAbility do
     context 'for other participants' do
       let(:participant) { Fabricate(Group::BottomLayer::Member.name.to_sym, group: groups(:bottom_layer_two)).person }
 
-      # possible to show it because user has :layer_full on course group
+      # possible to show it because user has :layer_and_below_full on course group
       #it 'may not show participations' do
       #  should_not be_able_to(:show, participation)
       #end
