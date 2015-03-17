@@ -12,7 +12,8 @@ module Dropdown
       attr_reader :group, :event
 
       def initialize(template, group, event)
-        super(template, translate(:add), :plus)
+        label = translate("add_to_#{event.klass.name.underscore}", default: full_translation_key(:add))
+        super(template, label, :plus)
         @group = group
         @event = event
         init_items
@@ -25,7 +26,7 @@ module Dropdown
           link = template.new_group_event_role_path(group,
                                                     event,
                                                     event_role: { type: type.sti_name })
-          item(type.label, link)
+          add_item(type.label, link)
         end
       end
     end

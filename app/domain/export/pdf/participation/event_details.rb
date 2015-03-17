@@ -10,13 +10,17 @@ module Export::Pdf::Participation
     attr_reader :count
 
     def render
-      pdf.start_new_page
+      pdf.start_new_page if description? || requirements?
 
-      render_description if event.description.present?
+      render_description if description?
       render_requirements if requirements?
     end
 
     private
+
+    def description?
+      event.description.present?
+    end
 
     def render_description
       with_count(description_title) do
@@ -25,7 +29,7 @@ module Export::Pdf::Participation
     end
 
     def render_requirements
-      with_count(t(".requirements_for_#{i18n_event_postfix}")) do
+      with_count(I18n.t("event.participations.print.requirements_for_#{i18n_event_postfix}")) do
         boxed_attr(event, :application_conditions)
 
         if course?

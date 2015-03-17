@@ -19,6 +19,7 @@ class MailingListsController < CrudController
 
   def show
     @mailing_list = entry
+    respond_with(@mailing_list)
   end
 
   private
@@ -27,6 +28,9 @@ class MailingListsController < CrudController
     super.order(:name)
   end
 
+  def authorize_class
+    authorize!(:index_mailing_lists, group)
+  end
 
   alias_method :group, :parent
 

@@ -17,8 +17,9 @@
     - if can?(:show_details, entry)
       = render_attrs(entry, :created_at)
 
-    -if can?(:show_details, entry) # participation
-      = render_extensions :details, folder: :people, locals: { entry: entry.person, show_full: true }
+      = render_extensions :details,
+                          folder: :people,
+                          locals: { entry: entry.person, show_full: false }
 
       -if @answers.present?
         = render 'answers'
@@ -42,3 +43,4 @@
     - if can?(:show_details, entry)
       = render 'people/qualifications', entry: entry.person, show_buttons: false
 
+    = render_extensions :asides

@@ -9,25 +9,28 @@ module Import
   class PersonImporter
     include Translatable
 
-    attr_accessor :data, :role_type, :group, :errors, :doublettes,
-                  :failure_count, :new_count, :doublette_count
+    attr_reader :data, :role_type, :group, :override,
+                :failure_count, :new_count, :errors
 
 
-    def initialize(hash = {})
-      @errors = []
+    def initialize(data, group, role_type, override = false)
+      @data = data
+      @group = group
+      @role_type = role_type
+      @override = override
+      @imported_emails = {}
       @failure_count = 0
       @new_count = 0
-      @doublettes = {}
-      hash.each { |key, value| send("#{key}=", value) }
-    end
-
-    def people
-      @people ||= data.each_with_index.map { |hash, index|  populate_people(hash, index) }
+      @errors = []
     end
 
     def import
-      save_results = people.map(&:save)
-      save_results.all? { |result| result }
+      save_results = people.map { |p| valid?(p) && p.save }
+      !save_results.include?(false)
+    end
+
+    def people
+      @people ||= populate_people
     end
 
     def human_name(args = {})
@@ -35,73 +38,47 @@ module Import
     end
 
     def human_role_name
-      @role_name ||= @role_type.label
+      @role_type.label
     end
 
     def doublette_count
-      doublettes.keys.count
+      doublette_finder.doublette_count
     end
 
     private
 
-    def populate_people(hash, index)
-      person = Import::Person.new(hash, unique_emails)
-      person.add_role(group, role_type)
-
-      handle_person(person, index)
+    def populate_people
+      data.each_with_index.map do |attributes, index|
+        populate_person(attributes.with_indifferent_access, index)
+      end
     end
 
-    def handle_person(person, index)
-      if valid?(person)
-        handle_imported_person(person)
+    def populate_person(attributes, index)
+      person = doublette_finder.find(attributes) || ::Person.new
+
+      import_person = Import::Person.new(person, attributes, override)
+      import_person.populate
+      import_person.add_role(group, role_type)
+
+      count_person(import_person, index)
+      import_person
+    end
+
+    def count_person(import_person, index)
+      if valid?(import_person)
+        @new_count += 1 if import_person.new_record?
       else
         @failure_count += 1
-        errors << translate(:row_with_error, row: index + 1, errors: person.human_errors)
-        person
+        @errors << translate(:row_with_error, row: index + 1, errors: import_person.human_errors)
       end
     end
 
-    def handle_imported_person(person)
-      if person.persisted?
-        handle_persisted(person)
-        doublettes[person.id]
-      else
-        @new_count += 1
-        person
-      end
+    def valid?(import_person)
+      import_person.valid? && import_person.email_unique?(@imported_emails)
     end
 
-    def handle_persisted(import_person)
-      if !doublettes.key?(import_person.id)
-        doublettes[import_person.id] = import_person
-      else
-        consolidate_doublette(import_person)
-      end
-    end
-
-    def consolidate_doublette(import_person)
-      unified_import_person = doublettes[import_person.id]
-      person = unified_import_person.person
-
-      blank_attrs = import_person.hash.select { |key, _value| person.attributes[key].blank? }
-      person.attributes = blank_attrs
-
-      person.phone_numbers << import_person.person.phone_numbers
-      person.social_accounts << import_person.person.social_accounts
-    end
-
-    # we ignore duplicate emails for persisted people, they are handle by doublettes
-    def valid?(person)
-      # DoubletteFinder in Person populates errors,
-      # still check if initialized person is valid
-      person.errors.empty? &&
-      ((person.persisted? && person.person.valid?) ||
-       person.valid?)
-    end
-
-    # used by Import::Person to check if emails are unique
-    def unique_emails
-      @unique_emails ||= Set.new
+    def doublette_finder
+      @doublette_finder ||= PersonDoubletteFinder.new
     end
 
   end

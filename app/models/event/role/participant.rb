@@ -18,24 +18,8 @@
 # Teilnehmer
 class Event::Role::Participant < Event::Role
 
-  self.permissions = [:contact_data]
+  self.permissions = [:participations_read]
 
   self.kind = :participant
-
-  after_create :update_count
-  after_destroy :update_count
-
-
-  private
-
-  # if participation was removed, we must retrieve event
-  # participation we still have in memory
-  def update_count
-    event ||= participation.event
-    if event
-      event.refresh_participant_count!
-      event.refresh_representative_participant_count!
-    end
-  end
 
 end

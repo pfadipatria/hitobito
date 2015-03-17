@@ -39,6 +39,7 @@ describe CsvImportsController do
       flash[:alert].should eq 'Bitte wählen Sie eine gültige CSV Datei aus.'
       should redirect_to new_group_csv_imports_path(group)
     end
+
   end
 
   describe 'POST preview' do
@@ -63,6 +64,12 @@ describe CsvImportsController do
     it 'informs about duplicates in assignment' do
       post :preview, required_params.merge(field_mappings: { Vorname: 'first_name', Nachname: 'first_name' })
       flash[:alert].should eq 'Vorname wurde mehrfach zugewiesen.'
+      should render_template(:define_mapping)
+    end
+
+    it 'rerenders form when role_type is missing' do
+      post :preview, { group_id: group.id, data: data }
+      flash.now[:alert].should eq 'Role muss ausgefüllt werden.'
       should render_template(:define_mapping)
     end
 
@@ -160,16 +167,16 @@ describe CsvImportsController do
 
         before do
           @person = Fabricate(:person, first_name: 'bar', email: 'foo@bar.net', nickname: '')
-          @role_count = Role.count
-          @person_count = Person.count
         end
 
         it 'last update wins' do
-          post :create, required_params
+          expect do
+            expect do
+              post :create, required_params
+            end.to change { Role.count }.by(1)
+          end.not_to change { Person.count }
 
-          Role.count.should eq @role_count + 1
-          Person.count.should eq @person_count
-          flash[:notice].should eq  ['1 Person (Leader) wurde erfolgreich aktualisiert.']
+          flash[:notice].should eq ['1 Person (Leader) wurde erfolgreich aktualisiert.']
           @person.reload.nickname.should eq 'foobar'
         end
       end

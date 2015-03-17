@@ -20,14 +20,14 @@ class Event::ApplicationMarketController < ApplicationController
 
   def add_participant
     if assigner.createable?
-      assigner.create_role
+      assigner.add_participant
     else
       render 'participation_exists_error'
     end
   end
 
   def remove_participant
-    assigner.remove_role
+    assigner.remove_participant
   end
 
   def put_on_waiting_list
@@ -43,8 +43,8 @@ class Event::ApplicationMarketController < ApplicationController
   private
 
   def load_participants
-    event.participations_for(event.participant_type).
-      includes(:application, person: [:primary_group])
+    event.participations_for(*event.participant_types).
+          includes(:application, person: [:primary_group])
   end
 
   def load_applications
@@ -91,8 +91,13 @@ class Event::ApplicationMarketController < ApplicationController
   end
 
   def filter_by_waiting_list(conditions, args)
-    conditions << '(event_applications.waiting_list = ? AND events.kind_id = ?)'
-    args << true << event.kind_id
+    if event.kind_id
+      conditions << '(event_applications.waiting_list = ? AND events.kind_id = ?)'
+      args << true << event.kind_id
+    else
+      conditions << '(event_applications.waiting_list = ? AND events.kind_id IS NULL)'
+      args << true
+    end
   end
 
   def assigner
@@ -116,6 +121,7 @@ class Event::ApplicationMarketController < ApplicationController
   end
 
   def authorize
+    not_found unless event.supports_applications?
     authorize!(:application_market, event)
   end
 end

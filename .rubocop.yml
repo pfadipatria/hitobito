@@ -2,7 +2,6 @@ AllCops:
   RunRailsCops: true
   Exclude:
     - Rakefile
-    - Guardfile
     - db/**/*
     - config/**/*
     - lib/tasks/**/*
@@ -78,3 +77,6 @@ HasAndBelongsToMany:
 Style/GuardClause:
   Enabled: false
 
+# We thinks that's fine
+Style/SingleLineBlockParams:
+  Enabled: false

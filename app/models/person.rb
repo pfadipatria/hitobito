@@ -58,6 +58,9 @@ class Person < ActiveRecord::Base
                     :locked_at, :remember_created_at, :reset_password_token,
                     :reset_password_sent_at, :sign_in_count, :updated_at, :updater_id]
 
+  GENDERS = %w(m w)
+
+
   # define devise before other modules
   devise :database_authenticatable,
          :lockable,
@@ -69,6 +72,12 @@ class Person < ActiveRecord::Base
   include Groups
   include Contactable
   include DeviseOverrides
+  include I18nSettable
+  include I18nEnums
+
+  i18n_enum :gender, GENDERS
+  i18n_setter :gender, (GENDERS + [nil])
+  i18n_boolean_setter :company
 
   mount_uploader :picture, PictureUploader
 
@@ -113,7 +122,6 @@ class Person < ActiveRecord::Base
 
   schema_validations except: [:email, :picture, :created_at, :updated_at]
   validates :email, length: { allow_nil: true, maximum: 255 } # other email validations by devise
-  validates :gender, inclusion: %w(m w), allow_blank: true
   validates :company_name, presence: { if: :company? }
   validates :birthday, timeliness: { type: :date, allow_blank: true }
   validates :additional_information, length: { allow_nil: true, maximum: 2**16 - 1 }
@@ -122,6 +130,7 @@ class Person < ActiveRecord::Base
 
 
   ### CALLBACKS
+
   before_validation :override_blank_email
   before_validation :remove_blank_relations
   before_destroy :destroy_roles

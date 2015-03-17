@@ -22,7 +22,6 @@ class EventSeeder
       location: event_location,
       motto: Faker::Lorem.sentence,
       description: Faker::Lorem.paragraphs(rand(1..3)).join("\n"),
-      requires_approval: true,
       application_opening_at: date,
       application_closing_at: date + 60.days}
   end
@@ -39,8 +38,10 @@ class EventSeeder
     seed_dates(event, date + 90.days)
     seed_questions(event) if true?
     seed_leaders(event)
-    5.times do
-      seed_event_role(event, event.class.participant_type)
+    3.times do
+      event.class.participant_types.each do |type|
+        seed_event_role(event, type)
+      end
     end
   end
 
@@ -58,11 +59,10 @@ class EventSeeder
   def course_attributes(values)
      kind = @@kinds.shuffle.first
      values.merge({
-        name: "#{kind.short_name} #{values[:number]}",
-        kind_id: kind.id,
-        #state: Event::Course.possible_states.shuffle.first,
-        priorization: true,
-        requires_approval: true})
+        name: "#{kind.try(:short_name)} #{values[:number]}".strip,
+        kind_id: kind.try(:id),
+        state: Event::Course.possible_states.shuffle.first
+        })
   end
 
   def seed_dates(event, date)
@@ -93,20 +93,20 @@ class EventSeeder
   end
 
   def seed_leaders(event)
-    seed_event_role(event, Event::Role::Leader)
-    seed_event_role(event, Event::Role::AssistantLeader)
-    seed_event_role(event, Event::Role::Cook)
-    seed_event_role(event, Event::Role::Treasurer)
-    seed_event_role(event, Event::Role::Speaker)
+    event.role_types.each do |type|
+      seed_event_role(event, type) unless type.participant?
+    end
   end
 
   def seed_participants(event)
-    5.times do
-      p = seed_event_role(event, event.class.participant_type)
-      seed_application(p)
+    3.times do
+      event.class.participant_types.each do |type|
+        p = seed_event_role(event, type)
+        seed_application(p)
+      end
     end
 
-    5.times do
+    3.times do
       p = seed_participation(event)
       seed_application(p)
     end

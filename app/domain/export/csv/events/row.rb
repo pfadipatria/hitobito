@@ -1,12 +1,12 @@
 # encoding: utf-8
 
-#  Copyright (c) 2012-2013, Jungwacht Blauring Schweiz. This file is part of
+#  Copyright (c) 2012-2014, Jungwacht Blauring Schweiz. This file is part of
 #  hitobito and licensed under the Affero General Public License version 3
 #  or later. See the COPYING file at the top-level directory or at
 #  https://github.com/hitobito/hitobito.
 
 module Export::Csv::Events
-  class Row < Export::Csv::Base::Row
+  class Row < Export::Csv::Row
 
     self.dynamic_attributes = {
       /^contact_/  => :contactable_attribute,
@@ -19,7 +19,11 @@ module Export::Csv::Events
     end
 
     def state
-      I18n.t("activerecord.attributes.event/course.states.#{entry.state}") if entry.state
+      if entry.possible_states.present? && entry.state
+        I18n.t("activerecord.attributes.event/course.states.#{entry.state}")
+      else
+        entry.state
+      end
     end
 
     private
@@ -32,7 +36,8 @@ module Export::Csv::Events
 
     # only the first leader is taken into account
     def leader
-      @leader ||= entry.participations_for(Event::Role::Leader).first.try(:person)
+      leaders = entry.role_types.select(&:leader?)
+      @leader ||= entry.participations_for(*leaders).first.try(:person)
     end
 
     def contact

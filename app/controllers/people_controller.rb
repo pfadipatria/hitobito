@@ -9,6 +9,8 @@ class PeopleController < CrudController
 
   include Concerns::RenderPeopleExports
 
+  QUERY_FIELDS = [:first_name, :last_name, :company_name, :nickname, :town]
+
   self.nesting = Group
   self.nesting_optional = true
 
@@ -33,43 +35,35 @@ class PeopleController < CrudController
   prepend_before_action :entry, only: [:show, :edit, :update, :destroy,
                                        :send_password_instructions, :primary_group]
 
-  before_render_show :load_asides, if: -> { request.format.html? }
+  before_render_show :load_asides, if: -> { html_request? }
+
 
   def index
-    filter = Person::ListFilter.new(@group, current_user, params[:kind], params[:role_type_ids])
-    entries = filter.filter_entries
-    entries = entries.reorder(sort_expression) if sorting?
-    @multiple_groups = filter.multiple_groups
-
     respond_to do |format|
-      format.html  { @people = prepare_entries(entries).page(params[:page]) }
-      format.pdf   { render_pdf(entries) }
-      format.csv   { render_entries_csv(entries) }
-      format.email { render_emails(entries) }
-      format.json  { render_entries_json(entries) }
+      format.html  { @people = prepare_entries(filter_entries).page(params[:page]) }
+      format.pdf   { render_pdf(filter_entries) }
+      format.csv   { render_entries_csv(filter_entries) }
+      format.email { render_emails(filter_entries) }
+      format.json  { render_entries_json(filter_entries) }
     end
   end
 
   def show
-    if group.nil?
-      flash.keep if request.format.html?
-      redirect_to person_home_path(entry, format: request.format.to_sym)
-    else
-      respond_to do |format|
-        format.html
-        format.pdf  { render_pdf([entry]) }
-        format.csv  { render_entry_csv }
-        format.json { render_entry_json }
-      end
+    return redirect_to_home if group.nil?
+
+    respond_to do |format|
+      format.html
+      format.pdf  { render_pdf([entry]) }
+      format.csv  { render_entry_csv }
+      format.json { render_entry_json }
     end
   end
 
-  # GET ajax, without @group
+  # GET ajax, for auto complete fields, without @group
   def query
     people = []
     if params.key?(:q) && params[:q].size >= 3
-      search_clause = search_condition(:first_name, :last_name, :company_name, :nickname, :town)
-      people = Person.where(search_clause).
+      people = Person.where(search_condition(*QUERY_FIELDS)).
                       only_public_data.
                       order_by_name.
                       limit(10)
@@ -123,6 +117,20 @@ class PeopleController < CrudController
   private
 
   alias_method :group, :parent
+
+  def redirect_to_home
+    flash.keep if html_request?
+    redirect_to person_home_path(entry, format: request.format.to_sym)
+  end
+
+  def filter_entries
+    filter = Person::ListFilter.new(@group, current_user, params[:kind], params[:role_type_ids])
+    entries = filter.filter_entries
+    entries = entries.reorder(sort_expression) if sorting?
+    @multiple_groups = filter.multiple_groups
+    @all_count = filter.all_count if html_request?
+    entries
+  end
 
   def load_asides
     applications = pending_person_applications

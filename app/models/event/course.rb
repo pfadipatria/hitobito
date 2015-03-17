@@ -38,7 +38,7 @@ class Event::Course < Event
   # This statement is required because this class would not be loaded otherwise.
   require_dependency 'event/course/role/participant'
 
-  self.used_attributes += [:number, :kind_id, :state, :priorization, :requires_approval]
+  self.used_attributes += [:number, :kind_id, :state, :priorization, :group_ids, :requires_approval]
 
   self.role_types = [Event::Role::Leader,
                      Event::Role::AssistantLeader,
@@ -54,11 +54,12 @@ class Event::Course < Event
 
   belongs_to :kind
 
-  validates :kind_id, presence: true
+  validates :kind_id, presence: true, if: -> { used_attributes.include?(:kind_id) }
 
 
   def label_detail
-    "#{kind.short_name} #{number} #{group_names}"
+    label = used_attributes.include?(:kind_id) ? "#{kind.short_name} " : ''
+    label << "#{number} #{group_names}"
   end
 
   # Does this event provide qualifications
