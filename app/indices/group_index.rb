@@ -13,7 +13,7 @@ ThinkingSphinx::Index.define_partial :group do
   #attributes
   #has :name, short_name, email, address
 
-  ##NO IDEA
+  ##FOR FUCHS
 
 #  indexes parent.name, as: :parent_name
 #  indexes parent.short_name, as: :parent_short_name
