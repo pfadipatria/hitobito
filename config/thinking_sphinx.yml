@@ -17,6 +17,9 @@ base: &generic
 development:
   <<: *generic
   mysql41: <%= ENV['RAILS_SPHINX_PORT'] || 9312 %>
+  bin_path: "/usr/local/bin"
+  searchd_binary_name: searchd
+  indexer_binary_name: indexer
 
 test:
   <<: *generic

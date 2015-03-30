@@ -6,14 +6,20 @@
 #  https://github.com/hitobito/hitobito.
 
 ThinkingSphinx::Index.define_partial :group do
-  indexes name, short_name, sortable: true
-  indexes email, address, zip_code, town, country
+  #fields
+  #indexes :name, short_name, sortable: true
+  #indexes email, address, zip_code, town, country
 
-  indexes parent.name, as: :parent_name
-  indexes parent.short_name, as: :parent_short_name
-  indexes phone_numbers.number, as: :phone_number
-  indexes social_accounts.name, as: :social_account
-  indexes additional_emails.email, as: :additional_email
+  #attributes
+  #has :name, short_name, email, address
+
+  ##NO IDEA
+
+#  indexes parent.name, as: :parent_name
+#  indexes parent.short_name, as: :parent_short_name
+#  indexes phone_numbers.number, as: :phone_number
+#  indexes social_accounts.name, as: :social_account
+#  indexes additional_emails.email, as: :additional_email
 
   where 'groups.deleted_at IS NULL'
 end
