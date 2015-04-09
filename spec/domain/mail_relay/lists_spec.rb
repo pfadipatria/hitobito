@@ -138,6 +138,7 @@ describe MailRelay::Lists do
         last_email.body.should =~ /nicht berechtigt/
       end
     end
+
   end
 
   context 'excluded person' do
@@ -201,6 +202,33 @@ describe MailRelay::Lists do
     end
   end
 
+  context 'empty reply to' do
+
+    let(:message) do
+      message = <<-END
+        Return-Path: <d.k@autoreply.example.com>
+        From: d.k@autoreply.example.com
+        Reply-To: <>
+        To: \"hitobito\" <noreply@hitobito.ch>
+
+        Hallo
+        Vielen Dank f=FCr ihre Interesse.
+      END
+
+      mail = Mail.new(message)
+      mail.header['X-Envelope-To'] = envelope_to
+      mail
+    end
+
+    let(:from) { '<>' }
+
+    it { should_not be_sender_allowed }
+
+    it 'rejects without email' do
+      expect { subject.relay }.not_to change { ActionMailer::Base.deliveries.size }
+    end
+  end
+
   context 'bounce' do
     let(:from) { 'deamon@example.com' }
 
@@ -214,6 +242,20 @@ describe MailRelay::Lists do
       last_email.smtp_envelope_to.should == ['test@example.com']
       last_email.smtp_envelope_from.should == "#{list.mail_name}-bounces@localhost"
       last_email.from.should == [from]
+    end
+  end
+
+  context 'emails to app sender' do
+    let(:from) { 'deamon@example.com' }
+
+    let(:envelope_to) { MailRelay::Lists.app_sender_name }
+
+    before { Fabricate(:mailing_list, group: list.group, mail_name: MailRelay::Lists.app_sender_name) }
+
+    its(:sender_email) { should == from }
+
+    it 'does not reject messages' do
+      expect { subject.relay }.not_to change { ActionMailer::Base.deliveries.size }
     end
   end
 

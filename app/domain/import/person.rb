@@ -7,10 +7,11 @@
 
 module Import
   class Person
-    extend Forwardable
-    def_delegators :person, :persisted?, :save, :id, :errors
 
-    attr_reader :person, :hash, :phone_numbers, :social_accounts, :additional_emails, :emails
+    delegate :save, :new_record?, to: :person
+
+    attr_reader :person, :attributes, :override,
+                :phone_numbers, :social_accounts, :additional_emails
 
     class << self
       def fields
@@ -36,18 +37,22 @@ module Import
       end
     end
 
-    def initialize(hash, emails)
-      @emails = emails
-      prepare(hash)
+    def initialize(person, attributes, override = false)
+      @person = person
+      @override = override
+      prepare(attributes)
+    end
 
-      find_or_initialize_person
-      assign_additional_emails
-      assign_phone_numbers
-      assign_social_accounts
+    def populate
+      assign_attributes
+      assign_accounts(additional_emails, person.additional_emails)
+      assign_accounts(phone_numbers, person.phone_numbers)
+      assign_accounts(social_accounts, person.social_accounts)
     end
 
     def add_role(group, role_type)
-      return if person.roles.any? { |role| role.group == group && role.is_a?(role_type) }
+      return if person.roles.any? { |role| role.group == group && role.type == role_type.sti_name }
+
       role = person.roles.build
       role.group = group
       role.type = role_type.sti_name
@@ -56,73 +61,71 @@ module Import
 
     def human_errors
       person.errors.messages.map do |key, value|
-        key == :base ? value : "#{::Person.human_attribute_name(key)} #{value.join}"
+        key == :base ? value : "#{::Person.human_attribute_name(key)} #{value.join(', ')}"
       end.flatten.join(', ')
     end
 
-    # comply with db uniq index constraint on email
     def valid?
-      person.email ? (person.valid? && email_valid?) : person.valid?
+      person.errors.empty? && person.valid?
+    end
+
+    # assert that csv does not contain emails multiple times.
+    def email_unique?(imported_emails)
+      if person.email?
+        case imported_emails[person.email]
+        when person.object_id
+          true
+        when nil
+          imported_emails[person.email] = person.object_id
+          true
+        else
+          person.errors.add(:email, :taken)
+          false
+        end
+      else
+        true
+      end
     end
 
     private
 
-    def prepare(hash)
-      @hash = hash.with_indifferent_access
-      @additional_emails = extract_settings_fields(AdditionalEmail)
-      @phone_numbers = extract_settings_fields(PhoneNumber)
-      @social_accounts = extract_settings_fields(SocialAccount)
+    def prepare(attributes)
+      @attributes = attributes
+      @additional_emails = extract_contact_fields(AdditionalEmail)
+      @phone_numbers = extract_contact_fields(PhoneNumber)
+      @social_accounts = extract_contact_fields(SocialAccount)
     end
 
-    def find_or_initialize_person
-      @person = PersonDoubletteFinder.new(hash).find_and_update || ::Person.new(hash)
-    end
-
-    def assign_additional_emails
-      assign_accounts(additional_emails, person.additional_emails) do |existing, imported|
-        existing.email == imported[:email]
-      end
-    end
-
-    def assign_phone_numbers
-      assign_accounts(phone_numbers, person.phone_numbers) do |existing, imported|
-        existing.number == imported[:number]
-      end
-    end
-
-    def assign_social_accounts
-      assign_accounts(social_accounts, person.social_accounts) do |existing, imported|
-        existing.name == imported[:name] && existing.label == imported[:label]
-      end
+    def assign_attributes
+      person.attributes =
+        if override
+          attributes
+        else
+          attributes.select { |key, _v| person.attributes[key].blank? }
+        end
     end
 
     def assign_accounts(accounts, association)
       accounts.each do |imported|
-        unless association.any? { |a| yield a, imported }
+        existing = association.detect { |a| a.label == imported[:label] }
+        if existing
+          existing.attributes = imported if override
+        else
           association.build(imported)
         end
       end
     end
 
-    def extract_settings_fields(model)
+    def extract_contact_fields(model)
       keys = ContactAccountFields.new(model).keys
-      numbers = keys.select { |key| hash.key?(key) }
-      numbers.map do |key|
+      accounts = keys.select { |key| attributes.key?(key) }
+      accounts.map do |key|
         label = key.split('_').last.capitalize
-        value = hash.delete(key)
+        value = attributes.delete(key)
         { model.value_attr => value, :label => label } if value.present?
       end.compact
     end
 
-    def email_valid?
-      if emails.include?(person.email)
-        person.errors.add(:email, :taken)
-        false
-      else
-        (emails << person.email) && true
-        true
-      end
-    end
   end
 
 end

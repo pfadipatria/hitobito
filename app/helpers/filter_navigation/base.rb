@@ -20,7 +20,6 @@ module FilterNavigation
       @dropdown = Dropdown.new(template)
     end
 
-
     def to_s
       content_tag(:div, class: 'toolbar-pills') do
         content_tag(:ul, class: 'nav nav-pills group-pills') do
@@ -39,9 +38,10 @@ module FilterNavigation
       end
     end
 
-    def item(label, url)
+    def item(label, url, count = nil)
+      caption = count ? "#{label} (#{count})" : label
       @main_items << content_tag(:li,
-                                 link_to(label, url),
+                                 link_to(caption, url),
                                  class: ('active' if active_label == label))
     end
 

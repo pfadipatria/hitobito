@@ -94,7 +94,7 @@ describe Event::ParticipationsController, type: :controller do
       it "renders title for #{event_sym}" do
         event = send(event_sym)
         get :new, group_id: group.id, event_id: event.id
-        should have_content "Anmeldung für #{event.name}"
+        should have_content "Anmeldung als Teilnehmer/-in"
       end
     end
     it 'renders person field when passed for_someone_else param' do
@@ -124,11 +124,8 @@ describe Event::ParticipationsController, type: :controller do
   end
 
   describe 'GET print' do
-    subject { response.body }
     let(:person) { Fabricate(:person_with_address) }
     let(:application) { Fabricate(:event_application, priority_1: test_entry.event, participation: test_entry) }
-
-    let(:dom) { Capybara::Node::Simple.new(response.body) }
 
     before do
       test_entry.event.update_attribute(:contact, person)

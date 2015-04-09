@@ -30,6 +30,7 @@
 #= require remote-typeahead
 #= require modernizr.custom.min
 #= require_self
+#= require wagon
 #
 
 # scope for global functions
@@ -78,6 +79,28 @@ swapElements = (event) ->
   css = $(this).data('swap')
   $('.' + css).slideToggle()
   event.preventDefault()
+
+toggleElementByLink = (event) ->
+  selector = $(this).data('hide')
+  if $("##{selector}").is(':visible')
+    $("##{selector}").slideUp()
+  else
+    $("##{selector}").slideDown()
+  event.preventDefault()
+
+hideElementByCheckbox = (event) ->
+  selector = $(this).data('hide')
+  if this.checked
+    $("##{selector}").slideUp()
+  else
+    $("##{selector}").slideDown()
+
+showElementByCheckbox = (event) ->
+  selector = $(this).data('show')
+  if this.checked
+    $("##{selector}").slideDown()
+  else
+    $("##{selector}").slideUp()
 
 resetRolePersonId = (event) ->
   $('#role_person_id').val(null).change()
@@ -167,9 +190,17 @@ $ ->
   # wire up data swap links
   $('body').on('click', 'a[data-swap]', swapElements)
 
+  # wire up links that hide an other element when checked.
+  $('body').on('click', 'a[data-hide]', toggleElementByLink)
+
+  # wire up checkboxes that hide an other element when checked.
+  $('body').on('change', 'input[data-hide]', hideElementByCheckbox)
+
+  # wire up checkboxes that show an other element when checked.
+  $('body').on('change', 'input[data-show]', showElementByCheckbox)
+
   $('body').on('click', 'a[data-swap="person-fields"]', resetRolePersonId)
 
   $('body').on('click', '.popover a.cancel', closePopover)
 
   $('body').on('click', '.filter-toggle', toggleFilterRoles)
-

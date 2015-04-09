@@ -44,6 +44,8 @@ class Event < ActiveRecord::Base
   require_dependency 'event/role_decorator'
   require_dependency 'event/role_ability'
 
+  include Event::Participatable
+
   ### ATTRIBUTES
 
   class_attribute :used_attributes,
@@ -112,17 +114,29 @@ class Event < ActiveRecord::Base
   ### CLASS METHODS
 
   class << self
+
+    # Default scope for event lists
+    def list
+      order_by_date.
+      includes(:groups, :kind).
+      preload_all_dates.
+      uniq
+    end
+
+    def preload_all_dates
+      all.extending(Event::PreloadAllDates)
+    end
+
+    def order_by_date
+      joins(:dates).order('event_dates.start_at')
+    end
+
     # Events with at least one date in the given year
     def in_year(year)
       year = ::Date.today.year if year.to_i <= 0
       start_at = Time.zone.parse "#{year}-01-01"
       finish_at = start_at + 1.year
       joins(:dates).where(event_dates: { start_at: [start_at...finish_at] })
-    end
-
-    # Events with a start_at greater than argument
-    def since(datetime)
-      joins(:dates).where('event_dates.start_at >= ?', datetime)
     end
 
     # Events from groups in the hierarchy of the given user.
@@ -149,22 +163,6 @@ class Event < ActiveRecord::Base
       where('events.application_closing_at IS NULL OR events.application_closing_at >= ?', today).
       where('events.maximum_participants IS NULL OR events.maximum_participants <= 0 OR ' \
             'events.participant_count < events.maximum_participants')
-    end
-
-    def preload_all_dates
-      all.extending(Event::PreloadAllDates)
-    end
-
-    def order_by_date
-      joins(:dates).order('event_dates.start_at')
-    end
-
-    # Default scope for event lists
-    def list
-      order_by_date.
-      includes(:groups, :kind).
-      preload_all_dates.
-      uniq
     end
 
     # Is the given attribute used in the current STI class
@@ -195,8 +193,8 @@ class Event < ActiveRecord::Base
       type
     end
 
-    def participant_type
-      @participant_type ||= role_types.detect { |t| t.kind == :participant }
+    def participant_types
+      role_types.select(&:participant?)
     end
 
     # Return the role type with the given sti_name or raise an exception if not found
@@ -233,54 +231,12 @@ class Event < ActiveRecord::Base
     (maximum_participants.to_i == 0 || participant_count < maximum_participants)
   end
 
-  # Sum all assigned participations (no leaders) and store it in :participant_count
-  def refresh_participant_count!
-    count = participations.joins(:roles).
-                           where(event_roles: { type: participant_type.sti_name }).
-                           distinct.count
-    update_column(:participant_count, count)
-  end
-
-  # Sum assigned participations (all prios, no leaders) and unassigned with prio 1 and
-  # store it in :representative_participant_count
-  def refresh_representative_participant_count!
-    count = participations.
-      joins('LEFT JOIN event_roles ON event_participations.id = event_roles.participation_id').
-      where('event_roles.participation_id IS NULL OR event_roles.type = ?',
-            participant_type.sti_name).count
-    update_column(:representative_participant_count, count)
-  end
-
   def init_questions
     # do nothing by default
   end
 
-  def participations_for(*role_types)
-    participations.joins(:roles).
-                   where(event_roles: { type: role_types.map(&:sti_name) }).
-                   includes(:person).
-                   references(:person).
-                   order_by_role(self.class).
-                   merge(Person.order_by_name).
-                   uniq
-  end
-
-  # gets a list of all user defined participation role labels for this event
-  def participation_role_labels
-    @participation_role_labels ||=
-      Event::Role.joins(:participation).
-                  where('event_participations.event_id = ?', id).
-                  where('event_roles.label <> ""').
-                  uniq.order(:label).
-                  pluck(:label)
-  end
-
   def course_kind?
     kind_class == Event::Kind && kind.present?
-  end
-
-  def participant_type
-    self.class.participant_type
   end
 
   private

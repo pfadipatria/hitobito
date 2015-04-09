@@ -176,14 +176,6 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
-  def inline_check_box_button(attr, value, caption, html_options = {})
-    label(id_from_value(attr, value), class: 'checkbox') do
-      check_box(attr, html_options) + ' ' +
-      caption
-    end
-  end
-
-
   def inline_check_box(attr, value, caption, html_options = {})
     model_param = klass.model_name.param_key
     name = "#{model_param}[#{attr}][]"
@@ -208,7 +200,7 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
                         collection_prompt(attr, html_options),
                         html_options)
     else
-      help_inline(ta(:none_available, association(@object, attr)))
+      content_tag(:p, ta(:none_available, association(@object, attr)), class: 'text')
     end
   end
 
@@ -226,6 +218,13 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     belongs_to_field(attr, html_options)
   end
 
+  def i18n_enum_field(attr, labels, html_options = {})
+    html_options[:class] ||= 'span6'
+    collection_select(attr, labels, :first, :last,
+                      collection_prompt(attr, html_options),
+                      html_options)
+  end
+
   # rubocop:enable PredicateName
 
   def person_field(attr, _html_options = {})
@@ -239,10 +238,10 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
                          url: @template.query_people_path })
   end
 
-  def labeled_inline_fields_for(assoc, partial_name = nil, &block)
+  def labeled_inline_fields_for(assoc, partial_name = nil, record_object = nil, &block)
     content_tag(:div, class: 'control-group') do
       label(assoc, class: 'control-label') +
-      nested_fields_for(assoc, partial_name) do |fields|
+      nested_fields_for(assoc, partial_name, record_object) do |fields|
         content = block_given? ? capture(fields, &block) : render(partial_name, f: fields)
 
         content << help_inline(fields.link_to_remove(I18n.t('global.associations.remove')))
@@ -251,15 +250,21 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     end
   end
 
-  def nested_fields_for(assoc, partial_name = nil, &block)
+  def nested_fields_for(assoc, partial_name = nil, record_object = nil, &block)
     content_tag(:div, id: "#{assoc}_fields") do
-      fields_for(assoc) do |fields|
+      fields_for(assoc, record_object) do |fields|
         block_given? ? capture(fields, &block) : render(partial_name, f: fields)
       end
     end +
     content_tag(:div, class: 'controls') do
-      help_inline(link_to_add I18n.t('global.associations.add'), assoc)
+      content_tag(:p, link_to_add(I18n.t('global.associations.add'), assoc), class: 'text')
     end
+  end
+
+  def readonly_value(attr, html_options = {})
+    html_options[:class] ||= 'inline'
+    value = html_options.delete(:value) || template.format_attr(object, attr)
+    content_tag(:div, value, html_options)
   end
 
   def error_messages
@@ -427,11 +432,11 @@ class StandardFormBuilder < ActionView::Helpers::FormBuilder
     options = args.extract_options!
     help = options.delete(:help)
     help_inline = options.delete(:help_inline)
-    caption = options.delete(:caption)
+    label = options.delete(:label)
     addon = options.delete(:addon)
 
     labeled_args = [args.first]
-    labeled_args << caption if caption.present?
+    labeled_args << label if label.present?
 
     text = send(field_method, *(args << options)) + required_mark(args.first)
     text = with_addon(addon, text) if addon.present?

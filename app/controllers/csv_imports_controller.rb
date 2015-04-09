@@ -30,7 +30,7 @@ class CsvImportsController < ApplicationController
     valid_for_import? do
       @entries = importer.people.map(&:person)
       set_importer_flash_info
-      importer.errors.each { |error| add_to_flash(:alert, error) }
+      set_importer_flash_errors
     end
   end
 
@@ -55,6 +55,14 @@ class CsvImportsController < ApplicationController
     add_importer_info_to_flash(:alert, :failed, importer.failure_count)
   end
 
+  def set_importer_flash_errors
+    errors = importer.errors
+    if errors.size > 10
+      errors = errors.take(10) + ['...']
+    end
+    errors.each { |error| add_to_flash(:alert, error) }
+  end
+
   def add_importer_info_to_flash(flash, key, count)
     if count > 0
       add_to_flash(flash,
@@ -71,10 +79,18 @@ class CsvImportsController < ApplicationController
   end
 
   def valid_for_import?
-    if parse_or_redirect && sane_mapping?
+    if parse_or_redirect && sane_mapping? && valid_role?
       map_headers_and_import
       yield
     end
+  end
+
+  def valid_role?
+    return true if params[:role_type].present?
+
+    flash.now[:alert] = "#{Role.model_name} #{I18n.t('errors.messages.blank')}."
+    render :define_mapping
+    false
   end
 
   def custom_authorization
@@ -138,9 +154,7 @@ class CsvImportsController < ApplicationController
 
   def map_headers_and_import
     data = parser.map_data(field_mappings)
-    @importer = Import::PersonImporter.new(group: group,
-                                           data: data,
-                                           role_type: role_type)
+    @importer = Import::PersonImporter.new(data, group, role_type, override_behaviour)
   end
 
   def redirect_params
@@ -150,6 +164,10 @@ class CsvImportsController < ApplicationController
 
   def role_type
     @role_type ||= group.class.find_role_type!(params[:role_type])
+  end
+
+  def override_behaviour
+    params[:update_behaviour] == 'override'
   end
 
   def file_param
