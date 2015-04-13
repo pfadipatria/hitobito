@@ -47,6 +47,10 @@ class PersonDecorator < ApplicationDecorator
     end
   end
 
+  def full_birthday
+    birthday
+  end
+
   def picture_full_url
     if h.request
       h.request.protocol + h.request.host_with_port + picture.url
