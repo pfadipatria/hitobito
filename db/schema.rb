@@ -242,7 +242,7 @@ ActiveRecord::Schema.define(version: 20150123100928) do
     t.string   "address",                limit: 1024
     t.integer  "zip_code"
     t.string   "town"
-    t.string   "country"
+    t.string   "country", default: "Schweiz"
     t.string   "gender",                 limit: 1
     t.date     "birthday"
     t.text     "additional_information"
