@@ -13,6 +13,10 @@ base: &generic
   indexed_models:
   - Person
   - Group
+<% %w(address configuration_file log query_log pid_file indices_location binlog_path).each do |option| %>
+  <% value = ENV["RAILS_SPHINX_#{option.upcase}"] %>
+  <%= "#{option}: #{value}" if value.present? %>
+<% end %>
 
 development:
   <<: *generic
