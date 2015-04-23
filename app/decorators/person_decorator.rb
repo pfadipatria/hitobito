@@ -51,6 +51,7 @@ class PersonDecorator < ApplicationDecorator
     if birthday.is_a?(Date)
       Date.parse(birthday.to_s).strftime("%d.%m.%Y")
     end
+
   end
 
   def picture_full_url
