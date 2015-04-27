@@ -18,10 +18,21 @@ module Export::Csv::People
       entry.roles.map { |role| "#{role} #{role.group.with_layer.join(' / ')}"  }.join(', ')
     end
 
+    def groups
+      entry.groups.first
+    end
+
+    def type
+      entry.groups.first.type
+    end
+
+    def types
+
+    end
+
     def gender
       entry.gender_label
     end
-
     private
 
     def phone_number_attribute(attr)
