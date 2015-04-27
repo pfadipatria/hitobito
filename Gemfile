@@ -45,6 +45,7 @@ gem 'simpleidn'
 gem 'thinking-sphinx'
 gem 'validates_timeliness'
 gem 'wagons'
+gem 'pry'
 
 # load after others because of active record inherited alias chain.
 gem 'kaminari'

@@ -519,6 +519,7 @@ DEPENDENCIES
   prawn
   prawn-table
   protective
+  pry
   pry-debugger
   pry-doc
   pry-rails
