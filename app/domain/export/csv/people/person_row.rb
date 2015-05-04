@@ -28,7 +28,11 @@ module Export::Csv::People
     end
 
     def kanton
-
+     arr =  person_groups_array
+     puts arr.class
+     puts arr.size
+     puts ("B===============================================================D")
+     arr.each { |a| puts a, " " }
     end
 
     def region
@@ -44,6 +48,23 @@ module Export::Csv::People
 
     def corps
      #Group.where(id: entry.roles.first.group_id).pluck(:name)
+    end
+
+    def person_groups_array
+      role = entry.roles.first
+      group = Group.where(id: role.group_id)
+      persons_groups = Array.new(100)
+
+      while group.pluck(:parent_id).nil? do
+        persons_groups.push(group)
+        group = Group.where(id: group.pluck(:parent_id))
+      end
+
+      persons_groups
+
+      puts ("B==========================asd=====================================D")
+      persons_groups.each { |a| puts a, " " }
+
     end
 
 
