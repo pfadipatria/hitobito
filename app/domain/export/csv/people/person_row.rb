@@ -31,7 +31,6 @@ module Export::Csv::People
      arr =  person_groups_array
      puts arr.class
      puts arr.size
-     puts ("B===============================================================D")
      arr.each { |a| puts a, " " }
     end
 
@@ -56,7 +55,6 @@ module Export::Csv::People
       persons_groups = Array.new(100)
 
       while not group.class.nil?
-
         puts(".......................................................................")
         puts(group)
         persons_groups.push(group)
@@ -65,13 +63,8 @@ module Export::Csv::People
         end
       end
 
-
-
       persons_groups
-
-      puts ("B==========================asd=====================================D")
       persons_groups.each { |a| puts a, " " }
-
     end
 
 
