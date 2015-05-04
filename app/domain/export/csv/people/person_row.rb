@@ -22,15 +22,16 @@ module Export::Csv::People
       arr =  person_groups_array
 
       if arr.size >= 1
-        arr[(arr.size - 1)].pluck(:name)
+        arr[(arr.size - 1)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
       end
+
     end
 
     def kanton
       arr =  person_groups_array
 
       if arr.size > 1
-        arr[(arr.size - 2)].pluck(:name)
+        arr[(arr.size - 2)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
       end
     end
 
@@ -38,7 +39,7 @@ module Export::Csv::People
       arr =  person_groups_array
 
       if arr.size > 2
-        arr[(arr.size - 3)].pluck(:name)
+        arr[(arr.size - 3)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
       end
     end
 
@@ -46,7 +47,7 @@ module Export::Csv::People
       arr =  person_groups_array
 
       if arr.size > 3
-        arr[(arr.size - 4)].pluck(:name)
+        arr[(arr.size - 4)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
       end
     end
 
@@ -54,7 +55,7 @@ module Export::Csv::People
       arr =  person_groups_array
 
       if arr.size > 4
-        arr[(arr.size - 5)].pluck(:name)
+        arr[(arr.size - 5)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
       end
     end
 
@@ -64,9 +65,13 @@ module Export::Csv::People
       persons_groups = Array.new()
 
       while not group.class.nil?
+
         persons_groups.push(group)
+
         if (group.pluck(:type).to_s.include?("Group::Bund"))
           break
+        else
+          group = Group.where(id: group.pluck(:parent_id))
         end
       end
 
