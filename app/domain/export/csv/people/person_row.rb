@@ -18,17 +18,36 @@ module Export::Csv::People
       entry.roles.map { |role| "#{role} #{role.group.with_layer.join(' / ')}"  }.join(', ')
     end
 
-    def groups
-      entry.groups.first
+    def bund
+
+      Group.where(id: entry.roles.first.group_id).pluck(:name)
+      #group = Group.where(id: entry.roles.first.group_id)
+      #while group.pluck(:parent_id).nil?
+      #  group = Group.where(parent_id: group.pluck(:parent_id))
+      #end
     end
 
-    def type
-      entry.groups.first.type
-    end
-
-    def types
+    def kanton
 
     end
+
+    def region
+
+    end
+
+    def abteilung
+     # group = Group.where(id: entry.roles.first.group_id)
+     # while group.pluck(:type).to_s.include?("Group::Abteilung")
+     #   group = Group.where(parent_id: group.pluck(:parent_id))
+     # end
+    end
+
+    def corps
+     #Group.where(id: entry.roles.first.group_id).pluck(:name)
+    end
+
+
+
 
     def gender
       entry.gender_label
