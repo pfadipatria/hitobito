@@ -19,52 +19,59 @@ module Export::Csv::People
     end
 
     def bund
+      arr =  person_groups_array
 
-      Group.where(id: entry.roles.first.group_id).pluck(:name)
-      #group = Group.where(id: entry.roles.first.group_id)
-      #while group.pluck(:parent_id).nil?
-      #  group = Group.where(parent_id: group.pluck(:parent_id))
-      #end
+      if arr.size >= 1
+        arr[(arr.size - 1)].pluck(:name)
+      end
     end
 
     def kanton
-     arr =  person_groups_array
-     puts arr.class
-     puts arr.size
-     arr.each { |a| puts a, " " }
+      arr =  person_groups_array
+
+      if arr.size > 1
+        arr[(arr.size - 2)].pluck(:name)
+      end
     end
 
     def region
+      arr =  person_groups_array
 
+      if arr.size > 2
+        arr[(arr.size - 3)].pluck(:name)
+      end
     end
 
     def abteilung
-     # group = Group.where(id: entry.roles.first.group_id)
-     # while group.pluck(:type).to_s.include?("Group::Abteilung")
-     #   group = Group.where(parent_id: group.pluck(:parent_id))
-     # end
+      arr =  person_groups_array
+
+      if arr.size > 3
+        arr[(arr.size - 4)].pluck(:name)
+      end
     end
 
     def corps
-     #Group.where(id: entry.roles.first.group_id).pluck(:name)
+      arr =  person_groups_array
+
+      if arr.size > 4
+        arr[(arr.size - 5)].pluck(:name)
+      end
     end
 
     def person_groups_array
       role = entry.roles.first
       group = Group.where(id: role.group_id)
-      persons_groups = Array.new(100)
+      persons_groups = Array.new()
 
       while not group.class.nil?
-        puts(".......................................................................")
-        puts(group)
         persons_groups.push(group)
         if (group.pluck(:type).to_s.include?("Group::Bund"))
-        groupe = nil
+          break
         end
       end
 
-      persons_groups
-      persons_groups.each { |a| puts a, " " }
+      persons_groups.compact
+
     end
 
 
