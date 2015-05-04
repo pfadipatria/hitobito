@@ -55,10 +55,17 @@ module Export::Csv::People
       group = Group.where(id: role.group_id)
       persons_groups = Array.new(100)
 
-      while group.pluck(:parent_id).nil? do
+      while not group.class.nil?
+
+        puts(".......................................................................")
+        puts(group)
         persons_groups.push(group)
-        group = Group.where(id: group.pluck(:parent_id))
+        if (group.pluck(:type).to_s.include?("Group::Bund"))
+        groupe = nil
+        end
       end
+
+
 
       persons_groups
 
