@@ -53,11 +53,25 @@ module Export::Csv::People
 
     def corps
       arr =  person_groups_array
-
       if arr.size > 4
         arr[(arr.size - 5)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
       end
     end
+
+    def einheit
+      arr =  person_groups_array
+      if arr.size > 5
+        arr[(arr.size - 6)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+    end
+
+    def untereinheit
+      arr =  person_groups_array
+      if arr.size > 6
+        arr[(arr.size - 7)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+    end
+
 
     def person_groups_array
       role = entry.roles.first
