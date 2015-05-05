@@ -15,8 +15,9 @@ module Export::Csv::People
                                 /^people_relation_/ => :people_relation_attribute }
 
     def roles
-      entry.roles.map { |role| "#{role} #{role.group.with_layer.join(' / ')}"  }.join(', ')
+      entry.roles.map { |role| "#{role} #{role.group.with_layer.join(',')}"  }
     end
+
 
     def bund
       arr =  person_groups_array
