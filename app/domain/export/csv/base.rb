@@ -35,18 +35,49 @@ module Export::Csv
     # The list of all attributes exported to the csv.
     # overridde either this or #attribute_labels
     def attributes
-      attribute_labels.keys
+      attributes = attribute_labels.keys
+
+      i = 0
+      while i < attributes.size do
+        if attributes[i].to_s.include? "roles"
+          tmp = attributes[i]
+          attributes.delete_at(i)
+          attributes.push(tmp)
+          break
+        end
+        i = i +1
+      end
+
+
+      attributes
+
     end
 
     # A hash of all attributes mapped to their labels exported to the csv.
     # overridde either this or #attributes
     def attribute_labels
+      #this
       @attribute_labels ||= build_attribute_labels
     end
 
     # List of all lables.
     def labels
-      attribute_labels.values
+      attributes =attribute_labels.values
+
+      i = 0
+      while i < attributes.size do
+        if attributes[i].to_s.include? "Rollen"
+          tmp = attributes[i]
+          attributes.delete_at(i)
+          attributes.push(tmp)
+          break
+        end
+        i = i +1
+      end
+
+      attributes
+
+
     end
 
     private
