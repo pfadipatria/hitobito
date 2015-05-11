@@ -129,12 +129,29 @@ class PeopleController < CrudController
     entries = entries.reorder(sort_expression) if sorting?
     @multiple_groups = filter.multiple_groups
     @all_count = filter.all_count if html_request?
-    puts ("B========================D")
-    puts entries
     entries
   end
 
   def uselessPersonEntries
+    person_ids = Person.distinct.pluck(:id)
+    person_ids_role = Role.distinct.pluck(:person_id)
+    person_ids_subscription = Subscription.distinct.pluck(:subscriber_id)
+
+    useless_usersIds = person_ids - person_ids_role
+    useless_usersIds = useless_usersIds - person_ids_subscription
+
+
+    useless_users = Array.new()
+    i = 0;
+    while i< useless_usersIds.size
+      id = useless_usersIds[i]
+      person = Person.find(id)
+      useless_users.push(person)
+      i = i+1
+
+    end
+
+    useless_users
 
     end
 
@@ -214,9 +231,11 @@ class PeopleController < CrudController
   end
 
   def render_csv(entries, full, useless)
+
     if full
       send_data Export::Csv::People::PeopleFull.export(entries), type: :csv
     elsif useless
+      entries = uselessPersonEntries
       send_data Export::Csv::People::NoActiveRole.export(entries), type: :csv
     else
       send_data Export::Csv::People::PeopleAddress.export(entries), type: :csv

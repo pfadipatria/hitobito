@@ -12,11 +12,11 @@ module Export::Csv::People
   class NoActiveRole < PeopleAddress
 
 
-
-      def people_without_active_role
-         [:get_people_without_active_role]
-      end
-
+    def person_attributes
+      Person.column_names.collect(&:to_sym) -
+        Person::INTERNAL_ATTRS -
+        [:picture, :primary_group_id]
+    end
 
 
 

@@ -94,11 +94,6 @@ module Export::Csv::People
     end
 
 
-    def get_people_without_active_role
-      # get stuff
-
-    end
-
 
 
     def gender
