@@ -9,7 +9,7 @@
 module Export::Csv::People
 
 
-  class NoActiveRole
+  class NoActiveRole < PeopleAddress
 
 
 

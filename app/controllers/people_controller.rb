@@ -129,8 +129,14 @@ class PeopleController < CrudController
     entries = entries.reorder(sort_expression) if sorting?
     @multiple_groups = filter.multiple_groups
     @all_count = filter.all_count if html_request?
+    puts ("B========================D")
+    puts entries
     entries
   end
+
+  def uselessPersonEntries
+
+    end
 
   def load_asides
     applications = pending_person_applications
@@ -210,8 +216,8 @@ class PeopleController < CrudController
   def render_csv(entries, full, useless)
     if full
       send_data Export::Csv::People::PeopleFull.export(entries), type: :csv
-    else if useless
-      send_data Export::Csv::People::PeopleFull.export(entries), type: :csv
+    elsif useless
+      send_data Export::Csv::People::NoActiveRole.export(entries), type: :csv
     else
       send_data Export::Csv::People::PeopleAddress.export(entries), type: :csv
     end
