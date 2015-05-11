@@ -191,7 +191,8 @@ class PeopleController < CrudController
 
   def render_entries_csv(entries)
     full = params[:details].present? && index_full_ability?
-    render_csv(prepare_csv_entries(entries, full), full)
+    useless = params[:useless].present? && index_full_ability?
+    render_csv(prepare_csv_entries(entries, full), full, useless)
   end
 
   def prepare_csv_entries(entries, full)
@@ -203,11 +204,13 @@ class PeopleController < CrudController
   end
 
   def render_entry_csv
-    render_csv([entry], params[:details].present? && can?(:show_full, entry))
+    render_csv([entry], params[:details].present? && can?(:show_full, entry),params[:useless].present? && can?(:show_full, entry) )
   end
 
-  def render_csv(entries, full)
+  def render_csv(entries, full, useless)
     if full
+      send_data Export::Csv::People::PeopleFull.export(entries), type: :csv
+    else if useless
       send_data Export::Csv::People::PeopleFull.export(entries), type: :csv
     else
       send_data Export::Csv::People::PeopleAddress.export(entries), type: :csv
