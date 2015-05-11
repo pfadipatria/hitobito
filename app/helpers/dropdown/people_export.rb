@@ -32,7 +32,7 @@ module Dropdown
     def csv_links
       csv_path = params.merge(format: :csv)
 
-      if @details
+      if @details || @useless
         csv_item = add_item(translate(:csv), '#')
         csv_item.sub_items << Item.new(translate(:addresses), csv_path)
         csv_item.sub_items << Item.new(translate(:everything), csv_path.merge(details: true))

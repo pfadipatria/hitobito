@@ -12,5 +12,5 @@
     %li= link_to current_user, person_home_path(current_user)
     %li= link_to t('.sign_out'), destroy_person_session_path, method: "delete"
     %li= render 'layouts/quicksearch'
-    %li= action_button(t('event.lists.courses.uselessPeople'), params.merge(format: :csv).merge(useless: true).merge(returning: false), :download)
+    %li= action_button(t('event.lists.courses.uselessPeople'), params.merge(format: :csv).merge(useless: true), :download)
 
