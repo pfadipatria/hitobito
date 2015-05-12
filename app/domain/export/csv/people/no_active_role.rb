@@ -7,19 +7,11 @@
 #  https://github.com/hitobito/hitobito.
 
 module Export::Csv::People
-
-
   class NoActiveRole < PeopleAddress
-
-
     def person_attributes
       Person.column_names.collect(&:to_sym) -
         Person::INTERNAL_ATTRS -
         [:picture, :primary_group_id]
     end
-
-
-
-      end
-    end
-
+  end
+end

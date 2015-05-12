@@ -140,7 +140,6 @@ class PeopleController < CrudController
     useless_usersIds = person_ids - person_ids_role
     useless_usersIds = useless_usersIds - person_ids_subscription
 
-
     useless_users = Array.new()
     i = 0;
     while i< useless_usersIds.size
@@ -148,12 +147,10 @@ class PeopleController < CrudController
       person = Person.find(id)
       useless_users.push(person)
       i = i+1
-
     end
 
     useless_users
-
-    end
+  end
 
   def load_asides
     applications = pending_person_applications
@@ -232,8 +229,6 @@ class PeopleController < CrudController
   end
 
   def render_csv(entries, full, useless)
-
-
     if full
       send_data Export::Csv::People::PeopleFull.export(entries), type: :csv
     elsif useless

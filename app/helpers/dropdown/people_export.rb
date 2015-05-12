@@ -40,9 +40,6 @@ module Dropdown
       else
         add_item(translate(:csv), csv_path)
       end
-
-
-
     end
 
     def email_addresses_link
