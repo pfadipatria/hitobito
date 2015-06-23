@@ -18,10 +18,87 @@ module Export::Csv::People
       entry.roles.map { |role| "#{role} #{role.group.with_layer.join(' / ')}"  }.join(', ')
     end
 
+    def bund
+      arr =  person_groups_array
+
+      if arr.size >= 1
+        arr[(arr.size - 1)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+
+    end
+
+    def kanton
+      arr =  person_groups_array
+
+      if arr.size > 1
+        arr[(arr.size - 2)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+    end
+
+    def region
+      arr =  person_groups_array
+
+      if arr.size > 2
+        arr[(arr.size - 3)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+    end
+
+    def abteilung
+      arr =  person_groups_array
+
+      if arr.size > 3
+        arr[(arr.size - 4)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+    end
+
+    def corps
+      arr =  person_groups_array
+      if arr.size > 4
+        arr[(arr.size - 5)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+    end
+
+    def einheit
+      arr =  person_groups_array
+      if arr.size > 5
+        arr[(arr.size - 6)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+    end
+
+    def untereinheit
+      arr =  person_groups_array
+      if arr.size > 6
+        arr[(arr.size - 7)].pluck(:name).to_s.tr("\"", "").tr("[", "").tr("]", "")
+      end
+    end
+
+
+    def person_groups_array
+      role = entry.roles.first
+      group = Group.where(id: role.group_id)
+      persons_groups = Array.new()
+
+      while not group.class.nil?
+
+        persons_groups.push(group)
+
+        if (group.pluck(:type).to_s.include?("Group::Bund"))
+          break
+        else
+          group = Group.where(id: group.pluck(:parent_id))
+        end
+      end
+
+      persons_groups.compact
+
+    end
+
+
+
+
     def gender
       entry.gender_label
     end
-
     private
 
     def phone_number_attribute(attr)

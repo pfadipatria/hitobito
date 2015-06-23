@@ -13,7 +13,7 @@ module Export::Csv::People
       Person.column_names.collect(&:to_sym) -
         Person::INTERNAL_ATTRS -
         [:picture, :primary_group_id] +
-        [:roles]
+        [:roles] + [:bund, :kanton, :region, :abteilung, :corps, :einheit, :untereinheit]
     end
 
     def association_attributes
