@@ -10,13 +10,12 @@ module Dropdown
 
     attr_reader :user, :params
 
-    def initialize(template, user, params, details, email_addresses, useless)
+    def initialize(template, user, params, details, email_addresses)
       super(template, translate(:button), :download)
       @user = user
       @params = params
       @details = details
       @email_addresses = email_addresses
-      @useless = useless
 
       init_items
     end
@@ -32,11 +31,10 @@ module Dropdown
     def csv_links
       csv_path = params.merge(format: :csv)
 
-      if @details || @useless
+      if @details
         csv_item = add_item(translate(:csv), '#')
         csv_item.sub_items << Item.new(translate(:addresses), csv_path)
         csv_item.sub_items << Item.new(translate(:everything), csv_path.merge(details: true))
-        csv_item.sub_items << Item.new(translate(:uselessPeople), csv_path.merge(useless: true))
       else
         add_item(translate(:csv), csv_path)
       end
