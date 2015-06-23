@@ -28,7 +28,7 @@ module Export::Csv::People
 
     def person_attributes
       [:first_name, :last_name, :nickname, :company_name, :company, :email,
-       :address, :zip_code, :town, :country, :gender, :birthday, :roles, :bund, :kanton, :region, :abteilung, :corps, :einheit, :untereinheit]
+       :address, :zip_code, :town, :country, :gender, :birthday, :roles]
     end
 
     def association_attributes
