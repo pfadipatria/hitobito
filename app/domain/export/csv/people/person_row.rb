@@ -72,7 +72,6 @@ module Export::Csv::People
       end
     end
 
-
     def person_groups_array
       role = entry.roles.first
       group = Group.where(id: role.group_id)
